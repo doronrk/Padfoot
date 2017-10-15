@@ -22,7 +22,8 @@ NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioP
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    setSize (400, 300);
+    setSize (700, 700);
+    addAndMakeVisible(sampleComponent);
 }
 
 NewProjectAudioProcessorEditor::~NewProjectAudioProcessorEditor()
@@ -38,11 +39,12 @@ void NewProjectAudioProcessorEditor::paint (Graphics& g)
 
     g.setColour (Colours::white);
     g.setFont (15.0f);
-    g.drawFittedText ("Hello Padfoot! 4", getLocalBounds(), Justification::centred, 1);
+    g.drawFittedText ("Hello Padfoot!            10", getLocalBounds(), Justification::centred, 1);
 }
 
 void NewProjectAudioProcessorEditor::resized()
 {
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
+    sampleComponent.setBounds(getBounds());
 }

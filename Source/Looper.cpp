@@ -18,18 +18,15 @@
 // SampleLoop
 ///////////////////////////////////////
 SampleLoop::SampleLoop()
-{
-    
-}
+{}
 
 void SampleLoop::updateData(AudioFormatReader &audioReader)
 {
     begin = 0;
     end = (int) audioReader.lengthInSamples;
-    // TOOD good pointer practice
-    delete data;
-    data = new AudioSampleBuffer(2, end);
-    audioReader.read(data, 0, end, 0, true, true);
+    data.clear();
+    data.setSize(2, end);
+    audioReader.read(&data, 0, end, 0, true, true);
     dataSampleRate = audioReader.sampleRate;
     midiRootNote = 74;
 }
@@ -41,8 +38,9 @@ void SampleLoop::setOutSampleRate(double rate) {
 
 float SampleLoop::getSample(int chan, int sampleNum) const
 {
-    int wrapped = sampleNum % data->getNumSamples();
-    return data->getSample(chan, wrapped);
+    // TODO: proper looping logic here
+    int wrapped = sampleNum % data.getNumSamples();
+    return data.getSample(chan, wrapped);
 }
 
 float SampleLoop::getSampleInterp(int chan, double position) const
@@ -67,7 +65,7 @@ void SampleLoop::setLoop(double beginFrac, double endFrac)
     jassert(beginFrac < endFrac &&
             beginFrac >= 0.0 &&
             endFrac <= 1.0);
-    int numSamples = data->getNumSamples();
+    int numSamples = data.getNumSamples();
     begin = beginFrac * numSamples;
     end = endFrac * numSamples;
 }

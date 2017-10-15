@@ -12,10 +12,11 @@
 
 Padfoot::Padfoot()
 {
+    // TODO move this drag and drop logic into Sample Component
     WavAudioFormat wavFormat;
     File f("~/Desktop/padfoot.wav");
-    FileInputStream fstream(f);
-    ScopedPointer<AudioFormatReader> afr(wavFormat.createReaderFor(&fstream, true));
+    FileInputStream *fstream = new FileInputStream(f);
+    ScopedPointer<AudioFormatReader> afr(wavFormat.createReaderFor(fstream, true));
     sampleLoop.updateData(*afr);
 
     /* TODO: pre-allocate collection of padfoot notes.
@@ -58,6 +59,7 @@ void Padfoot::handleMidiEvent (const MidiMessage &m)
 
 void Padfoot::processBlock (AudioSampleBuffer& outputAudio, MidiBuffer& midiData)
 {
+    // TODO move midi logic into helper
     int startSample = 0;
     int numSamples = outputAudio.getNumSamples();
     MidiBuffer::Iterator midiIterator (midiData);

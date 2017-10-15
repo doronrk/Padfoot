@@ -41,10 +41,10 @@ void SampleComponent::resized()
 
 void SampleComponent::resetThumbnail()
 {
-    const AudioSampleBuffer *newData = sampleLoop.data;
-    int n = newData->getNumSamples();
+    const AudioSampleBuffer &newData = sampleLoop.data;
+    int n = newData.getNumSamples();
     thumbnail.reset(1, 512, n);
-    thumbnail.addBlock(0, *newData, 0, n);
+    thumbnail.addBlock(0, newData, 0, n);
 }
 
 
