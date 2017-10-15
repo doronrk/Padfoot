@@ -10,11 +10,15 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "Looper.h"
 
 
 //==============================================================================
 NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioProcessor& p)
-    : AudioProcessorEditor (&p), processor (p)
+    : AudioProcessorEditor (&p),
+    processor (p),
+    padfoot(p.padfoot),
+    sampleComponent(p.padfoot.sampleLoop)
 {
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
@@ -23,6 +27,7 @@ NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioP
 
 NewProjectAudioProcessorEditor::~NewProjectAudioProcessorEditor()
 {
+    
 }
 
 //==============================================================================
@@ -33,7 +38,7 @@ void NewProjectAudioProcessorEditor::paint (Graphics& g)
 
     g.setColour (Colours::white);
     g.setFont (15.0f);
-    g.drawFittedText ("Hello Padfoot! 2", getLocalBounds(), Justification::centred, 1);
+    g.drawFittedText ("Hello Padfoot! 4", getLocalBounds(), Justification::centred, 1);
 }
 
 void NewProjectAudioProcessorEditor::resized()

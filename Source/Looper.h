@@ -15,20 +15,19 @@
 class SampleLoop
 {
 public:
-    SampleLoop(const AudioSampleBuffer &data,
-               double dataSampleRate_,
-               double outSampleRate_,
-               int root);
+    SampleLoop();
+    void updateData(AudioFormatReader &);
     void setOutSampleRate(double rate);
-    // TODO make const
-    // this function handles wrap-around & interpolation
     float getSampleInterp(int chan, double position) const;
     double deltaForNote(int midiNoteNumber) const;
+    void setLoop(double begin, double end);
+    
+    AudioSampleBuffer* data;
+
 private:
     float getSample(int chan, int sampleNum) const;
     
-    const AudioSampleBuffer &data;
-    const double dataSampleRate;
+    double dataSampleRate;
     double outSampleRate;
     int midiRootNote;
     int begin; // inclusive

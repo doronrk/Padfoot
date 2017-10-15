@@ -24,11 +24,11 @@ public:
     
     void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages);
     void prepareToPlay (double sampleRate, int samplesPerBlock);
+    
+    SampleLoop sampleLoop;
+    PadfootNote *note;
 
 private:
     void handleMidiEvent(const MidiMessage &m);
     void renderNotes(AudioSampleBuffer &buffer, int startSample, int numSamples);
-    
-    ScopedPointer<SampleLoop> sampleLoop;
-    ScopedPointer<PadfootNote> note;
 };

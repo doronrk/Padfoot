@@ -12,6 +12,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
+#include "SampleComponent.h"
 
 
 //==============================================================================
@@ -31,6 +32,10 @@ private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     NewProjectAudioProcessor& processor;
+    Padfoot& padfoot;
+    
+    SampleComponent sampleComponent;
+
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NewProjectAudioProcessorEditor)
 };

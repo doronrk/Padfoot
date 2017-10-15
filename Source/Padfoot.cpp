@@ -10,21 +10,14 @@
 
 #include "Padfoot.h"
 
-Padfoot::Padfoot() {
+Padfoot::Padfoot()
+{
     WavAudioFormat wavFormat;
     File f("~/Desktop/padfoot.wav");
-    FileInputStream *fstream = new FileInputStream(f);
-    ScopedPointer<AudioFormatReader> audioReader(wavFormat.createReaderFor(fstream, true));
-    double sr = audioReader->sampleRate;
-    int root = 74;
-    
-    int len = (int) audioReader->lengthInSamples;
-    
-    AudioSampleBuffer *data = new AudioSampleBuffer(2, len);
-    audioReader->read(data, 0, len, 0, true, true);
-    
-    sampleLoop = new SampleLoop(*data, sr, 0.0, root);
-    note = new PadfootNote(*sampleLoop);
+    FileInputStream fstream(f);
+    ScopedPointer<AudioFormatReader> afr(wavFormat.createReaderFor(&fstream, true));
+    sampleLoop.updateData(*afr);
+
     /* TODO: pre-allocate collection of padfoot notes.
      each padfoot note pre-allocates some number of voices
      (1 for now)
@@ -41,7 +34,7 @@ Padfoot::Padfoot() {
      
      each process block, call render on every in-use note
      */
-    note = new PadfootNote(*sampleLoop);
+    note = new PadfootNote(sampleLoop);
 }
 
 Padfoot::~Padfoot() {}
@@ -118,6 +111,6 @@ void Padfoot::processBlock (AudioSampleBuffer& outputAudio, MidiBuffer& midiData
 
 void Padfoot::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    sampleLoop->setOutSampleRate(sampleRate);
+    sampleLoop.setOutSampleRate(sampleRate);
 }
 

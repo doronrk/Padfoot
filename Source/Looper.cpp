@@ -17,16 +17,23 @@
 ///////////////////////////////////////
 // SampleLoop
 ///////////////////////////////////////
-SampleLoop::SampleLoop(const AudioSampleBuffer &data_,
-                       double dataSampleRate_,
-                       double outSampleRate_,
-                       int root) :
-    data(data_),
-    dataSampleRate(dataSampleRate_),
-    outSampleRate(outSampleRate_),
-    midiRootNote(root),
-    begin(0),
-    end(data.getNumSamples()) {}
+SampleLoop::SampleLoop()
+{
+    
+}
+
+void SampleLoop::updateData(AudioFormatReader &audioReader)
+{
+    begin = 0;
+    end = (int) audioReader.lengthInSamples;
+    // TOOD good pointer practice
+    delete data;
+    data = new AudioSampleBuffer(2, end);
+    audioReader.read(data, 0, end, 0, true, true);
+    dataSampleRate = audioReader.sampleRate;
+    midiRootNote = 74;
+}
+
 
 void SampleLoop::setOutSampleRate(double rate) {
     outSampleRate = rate;
@@ -34,8 +41,8 @@ void SampleLoop::setOutSampleRate(double rate) {
 
 float SampleLoop::getSample(int chan, int sampleNum) const
 {
-    int wrapped = sampleNum % data.getNumSamples();
-    return data.getSample(chan, wrapped);
+    int wrapped = sampleNum % data->getNumSamples();
+    return data->getSample(chan, wrapped);
 }
 
 float SampleLoop::getSampleInterp(int chan, double position) const
@@ -45,7 +52,7 @@ float SampleLoop::getSampleInterp(int chan, double position) const
     float valNext = getSample(chan, sampleNum + 1);
     double alpha = position - sampleNum;
     double invAlpha = 1.0 - alpha;
-    return val * invAlpha + valNext * alpha; //TODO double check this
+    return val * invAlpha + valNext * alpha;
 }
 
 double SampleLoop::deltaForNote(int midiNoteNumber) const
@@ -53,6 +60,16 @@ double SampleLoop::deltaForNote(int midiNoteNumber) const
     int noteDelta = midiNoteNumber - midiRootNote;
     double sampleFactor = dataSampleRate / outSampleRate;
     return pow (2.0, noteDelta / 12.0) * sampleFactor;
+}
+
+void SampleLoop::setLoop(double beginFrac, double endFrac)
+{
+    jassert(beginFrac < endFrac &&
+            beginFrac >= 0.0 &&
+            endFrac <= 1.0);
+    int numSamples = data->getNumSamples();
+    begin = beginFrac * numSamples;
+    end = endFrac * numSamples;
 }
 
 ///////////////////////////////////////

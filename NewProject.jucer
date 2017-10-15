@@ -13,6 +13,10 @@
               pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.1.2">
   <MAINGROUP id="xFj02e" name="Padfoot">
     <GROUP id="{53A6EB2E-E476-3D8B-7693-DE189E7495F4}" name="Source">
+      <FILE id="dCWYia" name="SampleComponent.cpp" compile="1" resource="0"
+            file="Source/SampleComponent.cpp"/>
+      <FILE id="a2UupS" name="SampleComponent.h" compile="0" resource="0"
+            file="Source/SampleComponent.h"/>
       <FILE id="NqPmYy" name="Looper.cpp" compile="1" resource="0" file="Source/Looper.cpp"/>
       <FILE id="SwEXkm" name="Looper.h" compile="0" resource="0" file="Source/Looper.h"/>
       <FILE id="AAVj95" name="Padfoot.cpp" compile="1" resource="0" file="Source/Padfoot.cpp"/>
