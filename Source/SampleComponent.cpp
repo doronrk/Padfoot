@@ -16,6 +16,7 @@ SampleComponent::SampleComponent (SampleLoop &sl)
 thumbnailCache(5),
 thumbnail(512, formatManager, thumbnailCache)
 {
+    // TODO add logic for selecting the loop region of the sample 
     resetThumbnail();
 }
 
