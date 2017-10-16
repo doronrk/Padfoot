@@ -70,6 +70,15 @@ void SampleLoop::setLoop(double beginFrac, double endFrac)
     end = endFrac * numSamples;
 }
 
+std::pair<double, double> SampleLoop::getRange()
+{
+    int numSamples = data.getNumSamples();
+    double rangeBegin = begin / (double) numSamples;
+    double rangeEnd = end / (double) numSamples;
+    return std::pair<double, double>{rangeBegin, rangeEnd};
+}
+
+
 ///////////////////////////////////////
 // PadfootVoice
 ///////////////////////////////////////

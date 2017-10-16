@@ -12,30 +12,69 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
-#include "SampleComponent.h"
 
 
 //==============================================================================
-/**
-*/
+class LoopSelector : public Component
+{
+public:
+    LoopSelector(SampleLoop &sampleLoop);
+    
+    void paint (Graphics&) override;
+    void resized() override;
+    
+    void mouseDown(const MouseEvent &event) override;
+    void mouseUp(const MouseEvent &event) override;
+    
+private:
+    SampleLoop &sampleLoop;
+};
+
+//==============================================================================
+class Waveform : public Component
+{
+public:
+    Waveform(SampleLoop &sampleLoop);
+    
+    void paint (Graphics&) override;
+    void resized() override;
+    
+    void updateThumbnail();
+private:    
+    SampleLoop &sampleLoop;
+    
+    AudioFormatManager formatManager;
+    AudioThumbnailCache thumbnailCache;                  // [1]
+    AudioThumbnail thumbnail;
+};
+
+//==============================================================================
+class SampleArea : public Component
+{
+public:
+    SampleArea(SampleLoop &sampleLoop);
+    
+    void resized() override;
+private:
+    LoopSelector loopSelector;
+    Waveform waveform;
+};
+
+
+//==============================================================================
 class NewProjectAudioProcessorEditor  : public AudioProcessorEditor
 {
 public:
     NewProjectAudioProcessorEditor (NewProjectAudioProcessor&);
-    ~NewProjectAudioProcessorEditor();
 
-    //==============================================================================
     void paint (Graphics&) override;
     void resized() override;
 
 private:
-    // This reference is provided as a quick way for your editor to
-    // access the processor object that created it.
     NewProjectAudioProcessor& processor;
     Padfoot& padfoot;
     
-    SampleComponent sampleComponent;
-
+    SampleArea sampleArea;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NewProjectAudioProcessorEditor)
 };
