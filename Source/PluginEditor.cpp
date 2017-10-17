@@ -14,7 +14,10 @@
 
 //==============================================================================
 LoopSelector::LoopSelector(SampleLoop &sl) :
-sampleLoop(sl)
+sampleLoop(sl),
+dragInProgress(false),
+dragBegin(0),
+dragCurrent(0)
 {
     
 }
@@ -25,14 +28,17 @@ void LoopSelector::paint(Graphics& g)
     g.setColour(Colours::orange);
     g.drawRect(bounds);
     // draw the selected region
-    std::pair<double, double> range = sampleLoop.getRange();
-    double begin = range.first;
-    double end = range.second;
-    g.setColour(Colours::green);
-    Rectangle<double> selectedProp{begin, 0.0, end - begin, 1.0};
-    Rectangle<int> selectedRect = bounds.getProportion(selectedProp);
-    g.fillAll(Colours::orange);
-    g.fillRect(selectedRect);
+    if (dragInProgress) {
+        Rectangle<int> selectedRect{dragBegin, 0, dragCurrent - dragBegin, getHeight()};
+        g.fillRect(selectedRect);
+    } else {
+        std::pair<double, double> range = sampleLoop.getRange();
+        double begin = range.first;
+        double end = range.second;
+        Rectangle<double> selectedProp{begin, 0.0, end - begin, 1.0};
+        Rectangle<int> selectedRect = bounds.getProportion(selectedProp);
+        g.fillRect(selectedRect);
+    }
 }
 
 void LoopSelector::resized()
@@ -42,13 +48,27 @@ void LoopSelector::resized()
 
 void LoopSelector::mouseDown(const MouseEvent &event)
 {
-    
+    dragInProgress = true;
+    dragBegin = event.x;
+}
+
+void LoopSelector::mouseDrag(const MouseEvent &event)
+{
+    dragCurrent = event.x;
+    repaint();
 }
 
 void LoopSelector::mouseUp(const MouseEvent &event)
 {
-    // TODO continue here
-    event.getDistanceFromDragStartX();
+    int xDelta = event.getDistanceFromDragStartX();
+    int xEnd = event.x;
+    int xBegin = xEnd - xDelta;
+    int width = getWidth();
+    double begin = xBegin / (double) width;
+    double end = xEnd / (double) width;
+    sampleLoop.setLoop(begin, end);
+    dragInProgress = false;
+    repaint();
 }
 
 //==============================================================================
