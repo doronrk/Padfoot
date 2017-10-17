@@ -1,4 +1,3 @@
-Organize files into model/UI folders
 ASDR
   1 per instrument, each note gets a reference and applies gain to sum of all voices
 Different sustain modes
@@ -20,3 +19,5 @@ Adjust midi root note
 Support for major & minor samples depending on key
 Padfoot sample export by dragging some handle into DAW
   have a background thread render this as soon as parameters stay unchanged for at least 1 second or something
+crossfade near edges of sample loop
+expose attenuation of different octaves (through drawing a curve or something)

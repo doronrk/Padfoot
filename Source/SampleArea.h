@@ -47,7 +47,7 @@ private:
     SampleLoop &sampleLoop;
     
     AudioFormatManager formatManager;
-    AudioThumbnailCache thumbnailCache;                  // [1]
+    AudioThumbnailCache thumbnailCache;
     AudioThumbnail thumbnail;
 };
 
