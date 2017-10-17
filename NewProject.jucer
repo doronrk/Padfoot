@@ -13,10 +13,13 @@
               pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.1.2">
   <MAINGROUP id="xFj02e" name="Padfoot">
     <GROUP id="{53A6EB2E-E476-3D8B-7693-DE189E7495F4}" name="Source">
-      <FILE id="NqPmYy" name="Looper.cpp" compile="1" resource="0" file="Source/Looper.cpp"/>
-      <FILE id="SwEXkm" name="Looper.h" compile="0" resource="0" file="Source/Looper.h"/>
-      <FILE id="AAVj95" name="Padfoot.cpp" compile="1" resource="0" file="Source/Padfoot.cpp"/>
-      <FILE id="mpdfNz" name="Padfoot.h" compile="0" resource="0" file="Source/Padfoot.h"/>
+      <GROUP id="{8875D373-5A33-4A23-B9D2-38EBD8602DA5}" name="model">
+        <FILE id="AAVj95" name="Padfoot.cpp" compile="1" resource="0" file="Source/Padfoot.cpp"/>
+        <FILE id="mpdfNz" name="Padfoot.h" compile="0" resource="0" file="Source/Padfoot.h"/>
+        <FILE id="n5WoSK" name="SampleLoop.cpp" compile="1" resource="0" file="Source/SampleLoop.cpp"/>
+        <FILE id="WV0bxf" name="SampleLoop.h" compile="0" resource="0" file="Source/SampleLoop.h"/>
+      </GROUP>
+      <GROUP id="{CADE4551-F00F-34D3-40C4-DB183ECDB086}" name="ui"/>
       <FILE id="DIqThX" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="km7Zia" name="PluginProcessor.h" compile="0" resource="0"

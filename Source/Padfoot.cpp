@@ -10,6 +10,71 @@
 
 #include "Padfoot.h"
 
+#define LEFT 0
+#define RIGHT 1
+
+///////////////////////////////////////
+// PadfootVoice
+///////////////////////////////////////
+PadfootVoice::PadfootVoice(const SampleLoop &sampleLoop_) :
+position(0.0),
+midiNoteNumber(0),
+sampleLoop(sampleLoop_)
+{
+    
+}
+
+void PadfootVoice::setPosition(double pos) {
+    position = pos;
+}
+
+void PadfootVoice::setMidiNoteNumber(int num) {
+    midiNoteNumber = num;
+}
+
+void PadfootVoice::reset() {
+    setPosition(0.0);
+}
+
+void PadfootVoice::renderNextBlock(AudioSampleBuffer & output, int startSample, int numSamples)
+{
+    float *outL = output.getWritePointer(LEFT, startSample);
+    float *outR = output.getWritePointer(RIGHT, startSample);
+    
+    while (--numSamples >= 0) {
+        *outL++ = sampleLoop.getSampleInterpolated(LEFT, position);
+        *outR++ = sampleLoop.getSampleInterpolated(RIGHT, position);
+        position += sampleLoop.deltaForNote(midiNoteNumber);
+    }
+}
+
+///////////////////////////////////////
+// PadfootNote
+///////////////////////////////////////
+PadfootNote::PadfootNote (const SampleLoop &sampleLoop) :
+voice(sampleLoop) {}
+
+void PadfootNote::startNote (int midiNoteNumber, float velocity)
+{
+    voice.setMidiNoteNumber(midiNoteNumber);
+    voice.setPosition(0.0);
+    on = true;
+}
+
+void PadfootNote::stopNote (float velocity)
+{
+    voice.reset();
+    on = false;
+}
+
+void PadfootNote::renderNextBlock (AudioSampleBuffer&
+                                   outputBuffer, int startSample, int numSamples)
+{
+    if (on) {
+        voice.renderNextBlock(outputBuffer, startSample, numSamples);
+    }
+}
+
 Padfoot::Padfoot()
 {
     // TODO move this drag and drop logic into Sample Component
@@ -113,6 +178,6 @@ void Padfoot::processBlock (AudioSampleBuffer& outputAudio, MidiBuffer& midiData
 
 void Padfoot::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    sampleLoop.setOutSampleRate(sampleRate);
+    sampleLoop.setOutputSampleRate(sampleRate);
 }
 
