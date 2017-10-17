@@ -1,7 +1,9 @@
-ASDR
-  1 per instrument, each note gets a reference and applies gain to sum of all voices
+MUST HAVE:
+
+Polyphony support
+  handle the case where user lowers polyphony to less than current num active notes
 Different sustain modes
-Waveform zooming
+crossfade near edges of sample loop
 Mapping each note to multiple voices:
   octaves
   panned left and right
@@ -13,11 +15,23 @@ Mapping each note to multiple voices:
     * then introduce fanciness as needed but don't expose to user
       ** like "blend factor" don't have all down-tuned voices panned left, 
          octave zero downtuned goes right, octave one downtuned goes left, etc.
+ASDR
+  1 per instrument, each note gets a reference and applies gain to sum of all voices
 File drag and drop
-Polyphony support
+
+
+
+NICE TO HAVE:
+
+Waveform zooming
+expose attenuation of different octaves (through drawing a curve or something)
 Adjust midi root note
-Support for major & minor samples depending on key
 Padfoot sample export by dragging some handle into DAW
   have a background thread render this as soon as parameters stay unchanged for at least 1 second or something
-crossfade near edges of sample loop
-expose attenuation of different octaves (through drawing a curve or something)
+
+
+
+BONUS FEATURE:
+
+support "sync sample" style looping
+Support for major & minor samples depending on key
