@@ -19,7 +19,10 @@
         <FILE id="n5WoSK" name="SampleLoop.cpp" compile="1" resource="0" file="Source/SampleLoop.cpp"/>
         <FILE id="WV0bxf" name="SampleLoop.h" compile="0" resource="0" file="Source/SampleLoop.h"/>
       </GROUP>
-      <GROUP id="{CADE4551-F00F-34D3-40C4-DB183ECDB086}" name="ui"/>
+      <GROUP id="{CADE4551-F00F-34D3-40C4-DB183ECDB086}" name="ui">
+        <FILE id="f7c65E" name="SampleArea.cpp" compile="1" resource="0" file="Source/SampleArea.cpp"/>
+        <FILE id="ccvnVH" name="SampleArea.h" compile="1" resource="0" file="Source/SampleArea.h"/>
+      </GROUP>
       <FILE id="DIqThX" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="km7Zia" name="PluginProcessor.h" compile="0" resource="0"
