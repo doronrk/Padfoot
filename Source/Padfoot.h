@@ -13,6 +13,8 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "SampleLoop.h"
 
+#include <unordered_map>
+
 class PadfootVoice
 {
 public:
@@ -57,9 +59,15 @@ public:
     void prepareToPlay (double sampleRate, int samplesPerBlock);
     
     SampleLoop sampleLoop;
-    PadfootNote *note;
 
 private:
+    
+    std::unique_ptr<PadfootNote> getInactiveNote();
+    
+    std::vector<std::unique_ptr<PadfootNote>> inactiveNotes;
+    std::unordered_map<int, std::unique_ptr<PadfootNote>> activeNotes;
+
+    
     void handleMidiEvent(const MidiMessage &m);
     void renderNotes(AudioSampleBuffer &buffer, int startSample, int numSamples);
 };

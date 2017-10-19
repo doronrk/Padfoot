@@ -42,8 +42,8 @@ void PadfootVoice::renderNextBlock(AudioSampleBuffer & output, int startSample, 
     float *outR = output.getWritePointer(RIGHT, startSample);
     
     while (--numSamples >= 0) {
-        *outL++ = sampleLoop.getSampleInterpolated(LEFT, position);
-        *outR++ = sampleLoop.getSampleInterpolated(RIGHT, position);
+        *outL++ += sampleLoop.getSampleInterpolated(LEFT, position);
+        *outR++ += sampleLoop.getSampleInterpolated(RIGHT, position);
         position += sampleLoop.deltaForNote(midiNoteNumber);
     }
 }
@@ -83,6 +83,13 @@ Padfoot::Padfoot()
     FileInputStream *fstream = new FileInputStream(f);
     ScopedPointer<AudioFormatReader> afr(wavFormat.createReaderFor(fstream, true));
     sampleLoop.updateData(*afr);
+    
+    // TODO: make adjustable
+    int polyphony = 6;
+    
+    for (int i = 0; i < polyphony; i++) {
+        inactiveNotes.push_back(std::make_unique<PadfootNote>(sampleLoop));
+    }
 
     /* TODO: pre-allocate collection of padfoot notes.
      each padfoot note pre-allocates some number of voices
@@ -100,25 +107,44 @@ Padfoot::Padfoot()
      
      each process block, call render on every in-use note
      */
-    note = new PadfootNote(sampleLoop);
 }
 
-Padfoot::~Padfoot() {}
+Padfoot::~Padfoot()
+{}
 
 void Padfoot::renderNotes (AudioSampleBuffer &buffer, int startSample, int numSamples)
 {
-    note->renderNextBlock(buffer, startSample, numSamples);
+    for (const auto &entry : activeNotes) {
+        entry.second->renderNextBlock(buffer, startSample, numSamples);
+    }
+}
+
+std::unique_ptr<PadfootNote> Padfoot::getInactiveNote()
+{
+    // TODO: deactivate an active note
+    if (inactiveNotes.empty()) {
+        return nullptr;
+    }
+    std::unique_ptr<PadfootNote> note = std::move(inactiveNotes.back());
+    inactiveNotes.pop_back();
+    return note;
 }
 
 void Padfoot::handleMidiEvent (const MidiMessage &m)
 {
+    int noteNum = m.getNoteNumber();
+    float vel = m.getFloatVelocity();
     if (m.isNoteOn()) {
-        int noteNum = m.getNoteNumber();
-        float vel = m.getFloatVelocity();
+        std::unique_ptr<PadfootNote> note = getInactiveNote();
         note->startNote(noteNum, vel);
+        activeNotes[noteNum] = std::move(note);
     } else if (m.isNoteOff()) {
-        float vel = m.getFloatVelocity();
+        size_t count = activeNotes.count(noteNum);
+        if (count == 0) return;
+        std::unique_ptr<PadfootNote> note = std::move(activeNotes[noteNum]);
+        activeNotes.erase(noteNum);
         note->stopNote(vel);
+        inactiveNotes.push_back(std::move(note));
     }
 }
 
