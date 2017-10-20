@@ -90,23 +90,6 @@ Padfoot::Padfoot()
     for (int i = 0; i < polyphony; i++) {
         inactiveNotes.push_back(std::make_unique<PadfootNote>(sampleLoop));
     }
-
-    /* TODO: pre-allocate collection of padfoot notes.
-     each padfoot note pre-allocates some number of voices
-     (1 for now)
-     
-     there is a collection of in-use notes, and free notes.
-     
-     on note-on,
-         grab and move a note from free to in-use
-         set its note number, velocity
-     
-     on note-off
-         reset the note
-         move from in-use to free
-     
-     each process block, call render on every in-use note
-     */
 }
 
 Padfoot::~Padfoot()

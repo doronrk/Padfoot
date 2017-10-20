@@ -1,8 +1,5 @@
 MUST HAVE:
 
-Polyphony support
-  handle the case where user lowers polyphony to less than current num active notes
-Different sustain modes
 crossfade near edges of sample loop
 Mapping each note to multiple voices:
   octaves
@@ -18,7 +15,10 @@ Mapping each note to multiple voices:
 ASDR
   1 per instrument, each note gets a reference and applies gain to sum of all voices
 File drag and drop
-
+Adjustable polyphony
+  option to have multiple notes of same midi note number w/o retriggering 
+  recycle active note policy
+  handle the case where user lowers polyphony to less than current num active notes
 
 
 NICE TO HAVE:

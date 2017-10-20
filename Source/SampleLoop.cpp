@@ -37,7 +37,17 @@ float SampleLoop::getSample(int chan, int sampleNum) const
     // TODO: are begin + end really the right fields? should it be begin and length?
     int len = end - begin;
     int offset = sampleNum % len;
-    return data.getSample(chan, begin + offset);
+    if (!forward) {
+        offset = end - offset;
+    }
+    int sampleWithLoopMode = begin + offset;
+    if (mode == TWO_WAY) {
+        bool inForwardPortion = (sampleNum / len) % 2 == 0;
+        if (!inForwardPortion) {
+            sampleWithLoopMode = end - offset;
+        }
+    }
+    return data.getSample(chan, sampleWithLoopMode);
 }
 
 float SampleLoop::getSampleInterpolated(int chan, double position) const
@@ -48,6 +58,28 @@ float SampleLoop::getSampleInterpolated(int chan, double position) const
     double alpha = position - sampleNum;
     double invAlpha = 1.0 - alpha;
     return val * invAlpha + valNext * alpha;
+}
+
+// TODO: rename these getting functions
+// TODO: save CPU by understanding xfadeBegin only changes when xfadeSamples changes
+// TODO: save CPU by only calculating xfade stuff if xfadeSamples > 0
+float SampleLoop::getSampleFinal(int chan, double position) const
+{
+    int output = getSampleInterpolated(chan, position);
+    /*
+    int xfadeoutput = getSampleInterpolated(chan, position + xfadeSamples);
+    float xfadegain = 0.0;
+    if (xfadeSamples > 0) {
+        if (forward) {
+            int xfadeBegin = end - xfadeSamples;
+            if (position > xfadeBegin)
+        }
+        int factor = forward ? 1 : -1;
+        position + factor * xfadeSamples;
+    }
+    return output * (1.0 - xfadegain) + xfadeoutput * xfadegain;
+     */
+    return output;
 }
 
 double SampleLoop::deltaForNote(int midiNoteNumber) const
@@ -74,3 +106,23 @@ std::pair<double, double> SampleLoop::getRange()
     double rangeEnd = end / (double) numSamples;
     return std::pair<double, double>{rangeBegin, rangeEnd};
 }
+
+// TODO: UI
+void SampleLoop::setLoopMode(LoopMode mode_)
+{
+    mode = mode_;
+}
+
+// TODO: UI
+void SampleLoop::setForward(bool forward_)
+{
+    forward = forward_;
+}
+
+// TODO: UI
+void SampleLoop::setXFadeMilliseconds(int ms)
+{
+    double samplesPerMs = dataSampleRate / 1000.0;
+    xfadeSamples = ms * samplesPerMs;
+}
+
