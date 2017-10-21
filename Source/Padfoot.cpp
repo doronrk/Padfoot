@@ -42,8 +42,8 @@ void PadfootVoice::renderNextBlock(AudioSampleBuffer & output, int startSample, 
     float *outR = output.getWritePointer(RIGHT, startSample);
     
     while (--numSamples >= 0) {
-        *outL++ += sampleLoop.getSampleInterpolated(LEFT, position);
-        *outR++ += sampleLoop.getSampleInterpolated(RIGHT, position);
+        *outL++ += sampleLoop.getAmplitudeForPosition(LEFT, position);
+        *outR++ += sampleLoop.getAmplitudeForPosition(RIGHT, position);
         position += sampleLoop.deltaForNote(midiNoteNumber);
     }
 }

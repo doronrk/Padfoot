@@ -32,8 +32,8 @@ void LoopSelector::paint(Graphics& g)
     } else {
         std::pair<double, double> range = sampleLoop.getRange();
         double begin = range.first;
-        double end = range.second;
-        Rectangle<double> selectedProp{begin, 0.0, end - begin, 1.0};
+        double len = range.second;
+        Rectangle<double> selectedProp{begin, 0.0, len, 1.0};
         Rectangle<int> selectedRect = bounds.getProportion(selectedProp);
         g.fillRect(selectedRect);
     }
@@ -63,8 +63,8 @@ void LoopSelector::mouseUp(const MouseEvent &event)
     int xBegin = xEnd - xDelta;
     int width = getWidth();
     double begin = xBegin / (double) width;
-    double end = xEnd / (double) width;
-    sampleLoop.setRange(begin, end);
+    double len = xDelta / (double) width;
+    sampleLoop.setRange(begin, len);
     dragInProgress = false;
     repaint();
 }

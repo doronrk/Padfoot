@@ -22,33 +22,33 @@ public:
     SampleLoop();
     void updateData(AudioFormatReader &);
     void setOutputSampleRate(double rate);
-    float getAmplitudeAtPosition(int chan, double position) const;
+    /* Applies range, sustain mode, interpolation, and crossfade. */
+    float getAmplitudeForPosition(int chan, double position) const;
     double deltaForNote(int midiNoteNumber) const;
     
-    void setRange(double begin, double end);
+    void setRange(double begin, double len);
     std::pair<double, double> getRange();
     
     void setLoopMode(LoopMode mode);
     void setForward(bool forward);
-    void setXFadeMilliseconds(int ms);
+    void setCrossfadeFactor(double factor);
     
     // TODO figure out elegant way to expose this to SampleComponent class w/o making it public
     // and without this class having to know about the concept of a Thumbnail
     AudioSampleBuffer data;
 private:
-    bool movingForwardAtPosition(int position) const;
-    float getLoopedSampleNum(int sampleNum) const;
-    float getSampleInterpolated(int chan, double position) const;
-    float getXFadeGain(double xfadeposition) const;
-
-
+    inline bool movingForwardAtPosition(int position) const;
+    inline int applyDirectionToOffset(int offset) const;
+    inline int applySustainModeToDoubleLenOffset(int doubleLenOffset) const;
+    inline int getIndexForPosition(int position) const;
+    inline float getAmplitudeForPosition(int chan, int position) const;
+    
     LoopMode mode{TWO_WAY};
     bool forward{true};
-    double xfadeSamples{0.0};
-    
+
     double dataSampleRate;
     double outputSampleRate;
     int midiRootNote;
-    int begin; // inclusive
-    int end;   // exclusive
+    int begin;
+    int len;
 };

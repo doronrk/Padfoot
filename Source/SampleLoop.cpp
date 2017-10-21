@@ -20,10 +20,10 @@ SampleLoop::SampleLoop()
 void SampleLoop::updateData(AudioFormatReader &audioReader)
 {
     begin = 0;
-    end = (int) audioReader.lengthInSamples;
+    len = (int) audioReader.lengthInSamples;
     data.clear();
-    data.setSize(2, end);
-    audioReader.read(&data, 0, end, 0, true, true);
+    data.setSize(2, len);
+    audioReader.read(&data, 0, len, 0, true, true);
     dataSampleRate = audioReader.sampleRate;
     midiRootNote = 74;
 }
@@ -35,68 +35,59 @@ void SampleLoop::setOutputSampleRate(double rate) {
 
 bool SampleLoop::movingForwardAtPosition(int position) const
 {
-    int len = end - begin;
     return (position / len) % 2 == 0;
 }
 
-float SampleLoop::getLoopedSampleNum(int sampleNum) const
+int SampleLoop::applyDirectionToOffset(int offset) const
 {
-    int len = end - begin;
-    int offset = sampleNum % len;
-    if (!forward) {
-        offset = end - offset;
-    }
-    int sampleWithLoopMode = begin + offset;
-    if (mode == TWO_WAY) {
-        bool inForwardPortion = movingForwardAtPosition(sampleNum);
-        if (!inForwardPortion) {
-            sampleWithLoopMode = end - offset;
-        }
-    }
-    return sampleWithLoopMode;
-}
-
-float SampleLoop::getSampleInterpolated(int chan, double position) const
-{
-    int loopedSampleNum = getLoopedSampleNum((int) position);
-    float val = data.getSample(chan, loopedSampleNum);
-    float valNext = data.getSample(chan, loopedSampleNum + 1);
-    double alpha = position - (int) position;
-    double invAlpha = 1.0 - alpha;
-    return val * invAlpha + valNext * alpha;
-}
-
-float SampleLoop::getXFadeGain(int position) const
-{
-    int beginEdge = begin + xfadeSamples;
-    int endEdge = end - xfadeSamples;
-    
+    jassert(offset < len);
     if (forward) {
-        int xfadeBegin = end - xfadeSamples;
-        if (xfadeposition > xfadeBegin) {
-            double offset = xfadeposition - xfadeBegin;
-            return offset / xfadeSamples;
-        }
-    } else {
-        int xfadeBegin = begin + xfa
+        return offset;
     }
-    return 0.0;
+    return len - offset;
 }
 
-// TODO: rename these getting functions
-// TODO: save CPU by understanding xfadeBegin only changes when xfadeSamples changes
-// TODO: save CPU by only calculating xfade stuff if xfadeSamples > 0
-// TODO: decide what makes sense to store as samples, ms, seconds
-    // honestly, all state inside sample loop should probably be an integer referring to a sample index or length
-    // operations into sample buffer can take and return floats because outside state is floatey
-float SampleLoop::getAmplitudeAtPosition(int chan, double position) const
+int SampleLoop::applySustainModeToDoubleLenOffset(int doubleLenOffset) const
 {
-    float amp = getSampleInterpolated(chan, position);
-    float ampXFade = getSampleInterpolated(chan, position + xfadeSamples);
-    float xFadeGain = getXFadeGain(position + xfadeSamples);
-    return amp * (1.0 - xFadeGain) + ampXFade * xFadeGain;
+    jassert(doubleLenOffset < len * 2);
+    int singleLenOffset = doubleLenOffset % len;
+    if (mode == ONE_WAY) {
+        return singleLenOffset;
+    }
+    // mode == TWO_WAY
+    if (doubleLenOffset < len) {
+        return singleLenOffset;
+    }
+    return len - singleLenOffset - 1;
 }
 
+int SampleLoop::getIndexForPosition(int position) const
+{
+    int doubleLenOffset = position % (len * 2);
+    int sustainModeOffset = applySustainModeToDoubleLenOffset(doubleLenOffset);
+    int directionOffest = applyDirectionToOffset(sustainModeOffset);
+    return begin + directionOffest;
+}
+
+float SampleLoop::getAmplitudeForPosition(int chan, int position) const
+{
+    int index = getIndexForPosition(position);
+    return data.getSample(chan, index);
+}
+
+static inline float interpolate(float a, float b, double alpha)
+{
+    return a * (1.0 - alpha) + b * (alpha);
+}
+
+float SampleLoop::getAmplitudeForPosition(int chan, double position) const
+{
+    int positionFloor = (int) position;
+    double alpha = position - positionFloor;
+    float floorAmp = getAmplitudeForPosition(chan, positionFloor);
+    float ceilingAmp = getAmplitudeForPosition(chan, positionFloor + 1);
+    return interpolate(floorAmp, ceilingAmp, alpha);
+}
 
 double SampleLoop::deltaForNote(int midiNoteNumber) const
 {
@@ -105,22 +96,22 @@ double SampleLoop::deltaForNote(int midiNoteNumber) const
     return pow (2.0, noteDelta / 12.0) * sampleFactor;
 }
 
-void SampleLoop::setRange(double beginFrac, double endFrac)
+void SampleLoop::setRange(double beginFrac, double lenFrac)
 {
-    jassert(beginFrac < endFrac &&
+    jassert(beginFrac < lenFrac &&
             beginFrac >= 0.0 &&
-            endFrac <= 1.0);
+            lenFrac <= 1.0);
     int numSamples = data.getNumSamples();
     begin = beginFrac * numSamples;
-    end = endFrac * numSamples;
+    len = lenFrac * numSamples;
 }
 
 std::pair<double, double> SampleLoop::getRange()
 {
     int numSamples = data.getNumSamples();
     double rangeBegin = begin / (double) numSamples;
-    double rangeEnd = end / (double) numSamples;
-    return std::pair<double, double>{rangeBegin, rangeEnd};
+    double rangeLen = len / (double) numSamples;
+    return std::pair<double, double>{rangeBegin, rangeLen};
 }
 
 // TODO: UI
@@ -133,12 +124,5 @@ void SampleLoop::setLoopMode(LoopMode mode_)
 void SampleLoop::setForward(bool forward_)
 {
     forward = forward_;
-}
-
-// TODO: UI
-void SampleLoop::setXFadeMilliseconds(int ms)
-{
-    double samplesPerMs = dataSampleRate / 1000.0;
-    xfadeSamples = ms * samplesPerMs;
 }
 
