@@ -28,6 +28,7 @@ expose attenuation of different octaves (through drawing a curve or something)
 Adjust midi root note
 Padfoot sample export by dragging some handle into DAW
   have a background thread render this as soon as parameters stay unchanged for at least 1 second or something
+  related: recycle feature that just does this to the sample in place
 
 
 

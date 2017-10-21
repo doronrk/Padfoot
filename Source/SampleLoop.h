@@ -22,8 +22,7 @@ public:
     SampleLoop();
     void updateData(AudioFormatReader &);
     void setOutputSampleRate(double rate);
-    float getSampleInterpolated(int chan, double position) const;
-    float getSampleFinal(int chan, double position) const;
+    float getAmplitudeAtPosition(int chan, double position) const;
     double deltaForNote(int midiNoteNumber) const;
     
     void setRange(double begin, double end);
@@ -37,8 +36,12 @@ public:
     // and without this class having to know about the concept of a Thumbnail
     AudioSampleBuffer data;
 private:
-    float getSample(int chan, int sampleNum) const;
-    
+    bool movingForwardAtPosition(int position) const;
+    float getLoopedSampleNum(int sampleNum) const;
+    float getSampleInterpolated(int chan, double position) const;
+    float getXFadeGain(double xfadeposition) const;
+
+
     LoopMode mode{TWO_WAY};
     bool forward{true};
     double xfadeSamples{0.0};

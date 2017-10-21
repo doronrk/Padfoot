@@ -16,6 +16,7 @@
 SampleLoop::SampleLoop()
 {}
 
+// TODO: race condition? used during audio callback
 void SampleLoop::updateData(AudioFormatReader &audioReader)
 {
     begin = 0;
@@ -27,14 +28,19 @@ void SampleLoop::updateData(AudioFormatReader &audioReader)
     midiRootNote = 74;
 }
 
-
+// TODO: race condition? used during audio callback
 void SampleLoop::setOutputSampleRate(double rate) {
     outputSampleRate = rate;
 }
 
-float SampleLoop::getSample(int chan, int sampleNum) const
+bool SampleLoop::movingForwardAtPosition(int position) const
 {
-    // TODO: are begin + end really the right fields? should it be begin and length?
+    int len = end - begin;
+    return (position / len) % 2 == 0;
+}
+
+float SampleLoop::getLoopedSampleNum(int sampleNum) const
+{
     int len = end - begin;
     int offset = sampleNum % len;
     if (!forward) {
@@ -42,45 +48,55 @@ float SampleLoop::getSample(int chan, int sampleNum) const
     }
     int sampleWithLoopMode = begin + offset;
     if (mode == TWO_WAY) {
-        bool inForwardPortion = (sampleNum / len) % 2 == 0;
+        bool inForwardPortion = movingForwardAtPosition(sampleNum);
         if (!inForwardPortion) {
             sampleWithLoopMode = end - offset;
         }
     }
-    return data.getSample(chan, sampleWithLoopMode);
+    return sampleWithLoopMode;
 }
 
 float SampleLoop::getSampleInterpolated(int chan, double position) const
 {
-    int sampleNum = (int) position;
-    float val = getSample(chan, sampleNum);
-    float valNext = getSample(chan, sampleNum + 1);
-    double alpha = position - sampleNum;
+    int loopedSampleNum = getLoopedSampleNum((int) position);
+    float val = data.getSample(chan, loopedSampleNum);
+    float valNext = data.getSample(chan, loopedSampleNum + 1);
+    double alpha = position - (int) position;
     double invAlpha = 1.0 - alpha;
     return val * invAlpha + valNext * alpha;
+}
+
+float SampleLoop::getXFadeGain(int position) const
+{
+    int beginEdge = begin + xfadeSamples;
+    int endEdge = end - xfadeSamples;
+    
+    if (forward) {
+        int xfadeBegin = end - xfadeSamples;
+        if (xfadeposition > xfadeBegin) {
+            double offset = xfadeposition - xfadeBegin;
+            return offset / xfadeSamples;
+        }
+    } else {
+        int xfadeBegin = begin + xfa
+    }
+    return 0.0;
 }
 
 // TODO: rename these getting functions
 // TODO: save CPU by understanding xfadeBegin only changes when xfadeSamples changes
 // TODO: save CPU by only calculating xfade stuff if xfadeSamples > 0
-float SampleLoop::getSampleFinal(int chan, double position) const
+// TODO: decide what makes sense to store as samples, ms, seconds
+    // honestly, all state inside sample loop should probably be an integer referring to a sample index or length
+    // operations into sample buffer can take and return floats because outside state is floatey
+float SampleLoop::getAmplitudeAtPosition(int chan, double position) const
 {
-    int output = getSampleInterpolated(chan, position);
-    /*
-    int xfadeoutput = getSampleInterpolated(chan, position + xfadeSamples);
-    float xfadegain = 0.0;
-    if (xfadeSamples > 0) {
-        if (forward) {
-            int xfadeBegin = end - xfadeSamples;
-            if (position > xfadeBegin)
-        }
-        int factor = forward ? 1 : -1;
-        position + factor * xfadeSamples;
-    }
-    return output * (1.0 - xfadegain) + xfadeoutput * xfadegain;
-     */
-    return output;
+    float amp = getSampleInterpolated(chan, position);
+    float ampXFade = getSampleInterpolated(chan, position + xfadeSamples);
+    float xFadeGain = getXFadeGain(position + xfadeSamples);
+    return amp * (1.0 - xFadeGain) + ampXFade * xFadeGain;
 }
+
 
 double SampleLoop::deltaForNote(int midiNoteNumber) const
 {
