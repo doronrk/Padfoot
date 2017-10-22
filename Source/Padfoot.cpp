@@ -16,10 +16,11 @@
 ///////////////////////////////////////
 // PadfootVoice
 ///////////////////////////////////////
-PadfootVoice::PadfootVoice(const SampleLoop &sampleLoop_) :
+PadfootVoice::PadfootVoice(const SampleLoop &sampleLoop_, const VoicePlaybackInfo &vpi) :
 position(0.0),
 midiNoteNumber(0),
-sampleLoop(sampleLoop_)
+sampleLoop(sampleLoop_),
+playbackInfo(vpi)
 {
     
 }
@@ -44,15 +45,15 @@ void PadfootVoice::renderNextBlock(AudioSampleBuffer & output, int startSample, 
     while (--numSamples >= 0) {
         *outL++ += sampleLoop.getAmplitude(LEFT, position);
         *outR++ += sampleLoop.getAmplitude(RIGHT, position);
-        position += sampleLoop.deltaForNote(midiNoteNumber);
+        position += playbackInfo.deltaForNote(midiNoteNumber);
     }
 }
 
 ///////////////////////////////////////
 // PadfootNote
 ///////////////////////////////////////
-PadfootNote::PadfootNote (const SampleLoop &sampleLoop) :
-voice(sampleLoop) {}
+PadfootNote::PadfootNote (const SampleLoop &sampleLoop, const VoicePlaybackInfo &vpi) :
+voice(sampleLoop, vpi) {}
 
 void PadfootNote::startNote (int midiNoteNumber, float velocity)
 {
@@ -76,19 +77,27 @@ void PadfootNote::renderNextBlock (AudioSampleBuffer&
 }
 
 Padfoot::Padfoot()
+: sampleLoop(data)
 {
     // TODO move this drag and drop logic into Sample Component
     WavAudioFormat wavFormat;
     File f("~/Desktop/padfoot.wav");
     FileInputStream *fstream = new FileInputStream(f);
     ScopedPointer<AudioFormatReader> afr(wavFormat.createReaderFor(fstream, true));
-    sampleLoop.updateData(*afr);
+    int len = (int) afr->lengthInSamples;
+    data.clear();
+    data.setSize(2, len);
+    afr->read(&data, 0, len, 0, true, true);
+    voicePlaybackInfo.dataSampleRate = afr->sampleRate;
+    voicePlaybackInfo.dataMidiRootNote = 74;
+
+    sampleLoop.reset();
     
     // TODO: make adjustable
     int polyphony = 6;
     
     for (int i = 0; i < polyphony; i++) {
-        inactiveNotes.push_back(std::make_unique<PadfootNote>(sampleLoop));
+        inactiveNotes.push_back(std::make_unique<PadfootNote>(sampleLoop, voicePlaybackInfo));
     }
 }
 
@@ -187,6 +196,6 @@ void Padfoot::processBlock (AudioSampleBuffer& outputAudio, MidiBuffer& midiData
 
 void Padfoot::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    sampleLoop.setOutputSampleRate(sampleRate);
+    voicePlaybackInfo.outputSampleRate = sampleRate;
 }
 

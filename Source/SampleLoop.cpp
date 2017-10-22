@@ -14,27 +14,16 @@
 // SampleLoop
 ///////////////////////////////////////
 
+SampleLoop::SampleLoop(const AudioSampleBuffer &data_)
+:data(data_) {}
+
 // TODO: race condition? used during audio callback
-void SampleLoop::updateData(AudioFormatReader &audioReader)
+void SampleLoop::reset()
 {
     begin = 0;
-    len = (int) audioReader.lengthInSamples;
-    data.clear();
-    data.setSize(2, len);
-    audioReader.read(&data, 0, len, 0, true, true);
-    dataSampleRate = audioReader.sampleRate;
-    midiRootNote = 74;
-    // TODO: validate, i.e. ensure num samples is at least 1.
-}
-
-// TODO: race condition? used during audio callback
-void SampleLoop::setOutputSampleRate(double rate) {
-    outputSampleRate = rate;
-}
-
-bool SampleLoop::movingForwardAtPosition(int position) const
-{
-    return (position / len) % 2 == 0;
+    len = data.getNumSamples();
+    // TODO: create a bound function for begin & len kind of like the crossfade one
+    // this can be called here and re-used when setRange is called.
 }
 
 int SampleLoop::applyDirectionToOffset(int offset) const
@@ -93,13 +82,6 @@ float SampleLoop::getAmplitude(int chan, double position) const
     return getAmplitudeForPosition(chan, position);
 }
 
-double SampleLoop::deltaForNote(int midiNoteNumber) const
-{
-    int noteDelta = midiNoteNumber - midiRootNote;
-    double sampleFactor = dataSampleRate / outputSampleRate;
-    return pow (2.0, noteDelta / 12.0) * sampleFactor;
-}
-
 void SampleLoop::setRange(double beginFrac, double lenFrac)
 {
     jassert(beginFrac < 1.0 &&
@@ -146,13 +128,27 @@ void SampleLoop::setBegin(int newbegin)
 ///////////////////////////////////////
 // SampleLoopCrossFader
 ///////////////////////////////////////
+SampleLoopCrossFader::SampleLoopCrossFader(const AudioSampleBuffer &data)
+: SampleLoop(data), secondary(data)
+{
+    
+}
+
 float SampleLoopCrossFader::getAmplitude(int chan, double position) const
 {
+    // TODO: support TWO_WAY crossfading
     float primaryAmp = SampleLoop::getAmplitude(chan, position);
-    if (crossfadeLen == 0) {
+    if (crossfadeLen == 0 || mode == TWO_WAY) {
         return primaryAmp;
     }
-    return 0.0;
+    int offset = ((int) position) % len;
+    int crossfadeProgress = len - crossfadeLen + offset;
+    if (crossfadeProgress < 0) {
+        return primaryAmp;
+    }
+    float secondaryAmp = secondary.getAmplitude(chan, position + crossfadeLen);
+    float alpha = crossfadeProgress / (float) crossfadeLen;
+    return interpolate(primaryAmp, secondaryAmp, alpha);
 }
 
 void SampleLoopCrossFader::setRange(double begin, double len)

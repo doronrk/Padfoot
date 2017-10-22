@@ -15,10 +15,26 @@
 
 #include <unordered_map>
 
+//==============================================================================
+struct VoicePlaybackInfo
+{
+    double deltaForNote(int midiNoteNumber) const
+    {
+        int noteDelta = midiNoteNumber - dataMidiRootNote;
+        double sampleFactor = dataSampleRate / outputSampleRate;
+        return pow (2.0, noteDelta / 12.0) * sampleFactor;
+    }
+    
+    double dataSampleRate;
+    double outputSampleRate;
+    int dataMidiRootNote;
+};
+
+//==============================================================================
 class PadfootVoice
 {
 public:
-    PadfootVoice(const SampleLoop &);
+    PadfootVoice(const SampleLoop &, const VoicePlaybackInfo &vpi);
     void renderNextBlock (AudioSampleBuffer &, int startSample, int numSamples);
     
     void setPosition(double pos);
@@ -31,13 +47,14 @@ private:
     double position;
     int midiNoteNumber;
     const SampleLoop &sampleLoop;
+    const VoicePlaybackInfo &playbackInfo;
 };
 
 //==============================================================================
 class PadfootNote
 {
 public:
-    PadfootNote(const SampleLoop &sampleLoop);
+    PadfootNote(const SampleLoop &sampleLoop, const VoicePlaybackInfo &vpi);
     
     void startNote (int midiNoteNumber, float velocity);
     void stopNote (float velocity);
@@ -58,7 +75,7 @@ public:
     void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages);
     void prepareToPlay (double sampleRate, int samplesPerBlock);
     
-    SampleLoop sampleLoop;
+    SampleLoopCrossFader sampleLoop;
 
 private:
     
@@ -69,4 +86,7 @@ private:
     
     std::vector<std::unique_ptr<PadfootNote>> inactiveNotes;
     std::unordered_map<int, std::unique_ptr<PadfootNote>> activeNotes;
+    
+    AudioSampleBuffer data;
+    VoicePlaybackInfo voicePlaybackInfo;
 };
