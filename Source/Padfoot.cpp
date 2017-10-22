@@ -98,7 +98,7 @@ Padfoot::Padfoot()
     
     for (int i = 0; i < polyphony; i++) {
         inactiveNotes.push_back(std::make_unique<PadfootNote>(sampleLoop, voicePlaybackInfo));
-    }
+    }    
 }
 
 Padfoot::~Padfoot()

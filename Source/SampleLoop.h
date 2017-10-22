@@ -29,9 +29,9 @@ public:
     virtual void setLoopMode(LoopMode mode);
     virtual void setForward(bool forward);
     
+    // These functions should only be called by SampleLoopCrossFader
     void setBegin(int begin);
-    
-    double deltaForNote(int midiNoteNumber) const;
+    void setLen(int len);
     
     const AudioSampleBuffer &data;
     
@@ -55,6 +55,8 @@ class SampleLoopCrossFader : public SampleLoop
 {
 public:
     SampleLoopCrossFader(const AudioSampleBuffer &data);
+    
+    void reset() override;
     float getAmplitude(int chan, double position) const override;
     void setRange(double begin, double len) override;
     void setLoopMode(LoopMode mode) override;
@@ -66,5 +68,5 @@ private:
     void updateSecondaryBegin();
     
     SampleLoop secondary;
-    int crossfadeLen{22050};
+    int crossfadeLen{0};
 };

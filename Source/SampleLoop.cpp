@@ -124,6 +124,10 @@ void SampleLoop::setBegin(int newbegin)
     begin = newbegin;
 }
 
+void SampleLoop::setLen(int newLen)
+{
+    len = newLen;
+}
 
 ///////////////////////////////////////
 // SampleLoopCrossFader
@@ -132,6 +136,12 @@ SampleLoopCrossFader::SampleLoopCrossFader(const AudioSampleBuffer &data)
 : SampleLoop(data), secondary(data)
 {
     
+}
+
+void SampleLoopCrossFader::reset()
+{
+    secondary.reset();
+    SampleLoop::reset();
 }
 
 float SampleLoopCrossFader::getAmplitude(int chan, double position) const
@@ -149,12 +159,17 @@ float SampleLoopCrossFader::getAmplitude(int chan, double position) const
     float secondaryAmp = secondary.getAmplitude(chan, position + crossfadeLen);
     float alpha = crossfadeProgress / (float) crossfadeLen;
     return interpolate(primaryAmp, secondaryAmp, alpha);
+    //return primaryAmp * .5 + secondaryAmp + .5;
 }
 
-void SampleLoopCrossFader::setRange(double begin, double len)
+void SampleLoopCrossFader::setRange(double beginFrac, double lenFrac)
 {
-    SampleLoop::setRange(begin, len);
+    // TODO this should be cleaner
+    SampleLoop::setRange(beginFrac, lenFrac);
     boundCrossfadeLen();
+    
+    //TODO remove this
+    setCrossfadeLen(44100);
 }
 
 void SampleLoopCrossFader::setLoopMode(LoopMode mode)
@@ -171,9 +186,9 @@ void SampleLoopCrossFader::setForward(bool forward)
 }
 
 // TODO: UI
-void SampleLoopCrossFader::setCrossfadeLen(int len)
+void SampleLoopCrossFader::setCrossfadeLen(int fadelen)
 {
-    crossfadeLen = len;
+    crossfadeLen = fadelen;
     boundCrossfadeLen();
 }
 
@@ -194,4 +209,5 @@ void SampleLoopCrossFader::updateSecondaryBegin()
 {
     int offset = forward ? -crossfadeLen : crossfadeLen;
     secondary.setBegin(begin + offset);
+    secondary.setLen(len);
 }
