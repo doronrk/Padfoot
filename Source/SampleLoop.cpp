@@ -13,8 +13,6 @@
 ///////////////////////////////////////
 // SampleLoop
 ///////////////////////////////////////
-SampleLoop::SampleLoop()
-{}
 
 // TODO: race condition? used during audio callback
 void SampleLoop::updateData(AudioFormatReader &audioReader)
@@ -26,6 +24,7 @@ void SampleLoop::updateData(AudioFormatReader &audioReader)
     audioReader.read(&data, 0, len, 0, true, true);
     dataSampleRate = audioReader.sampleRate;
     midiRootNote = 74;
+    // TODO: validate, i.e. ensure num samples is at least 1.
 }
 
 // TODO: race condition? used during audio callback
@@ -89,6 +88,11 @@ float SampleLoop::getAmplitudeForPosition(int chan, double position) const
     return interpolate(floorAmp, ceilingAmp, alpha);
 }
 
+float SampleLoop::getAmplitude(int chan, double position) const
+{
+    return getAmplitudeForPosition(chan, position);
+}
+
 double SampleLoop::deltaForNote(int midiNoteNumber) const
 {
     int noteDelta = midiNoteNumber - midiRootNote;
@@ -98,12 +102,19 @@ double SampleLoop::deltaForNote(int midiNoteNumber) const
 
 void SampleLoop::setRange(double beginFrac, double lenFrac)
 {
-    jassert(beginFrac < lenFrac &&
+    jassert(beginFrac < 1.0 &&
+            lenFrac <= 1.0 &&
             beginFrac >= 0.0 &&
-            lenFrac <= 1.0);
+            lenFrac >= 0.0);
     int numSamples = data.getNumSamples();
     begin = beginFrac * numSamples;
     len = lenFrac * numSamples;
+    if (len == 0) {
+        len = 1;
+    }
+    
+    int maxLen = numSamples - begin;
+    len = jmin(len, maxLen);
 }
 
 std::pair<double, double> SampleLoop::getRange()
@@ -126,3 +137,65 @@ void SampleLoop::setForward(bool forward_)
     forward = forward_;
 }
 
+void SampleLoop::setBegin(int newbegin)
+{
+    begin = newbegin;
+}
+
+
+///////////////////////////////////////
+// SampleLoopCrossFader
+///////////////////////////////////////
+float SampleLoopCrossFader::getAmplitude(int chan, double position) const
+{
+    float primaryAmp = SampleLoop::getAmplitude(chan, position);
+    if (crossfadeLen == 0) {
+        return primaryAmp;
+    }
+    return 0.0;
+}
+
+void SampleLoopCrossFader::setRange(double begin, double len)
+{
+    SampleLoop::setRange(begin, len);
+    boundCrossfadeLen();
+}
+
+void SampleLoopCrossFader::setLoopMode(LoopMode mode)
+{
+    secondary.setLoopMode(mode);
+    SampleLoop::setLoopMode(mode);
+}
+
+void SampleLoopCrossFader::setForward(bool forward)
+{
+    secondary.setForward(forward);
+    SampleLoop::setForward(forward);
+    boundCrossfadeLen();
+}
+
+// TODO: UI
+void SampleLoopCrossFader::setCrossfadeLen(int len)
+{
+    crossfadeLen = len;
+    boundCrossfadeLen();
+}
+
+void SampleLoopCrossFader::boundCrossfadeLen()
+{
+    // crossfadeLen cannot exceed length of the range
+    crossfadeLen = jmin(crossfadeLen, len);
+    if (forward) {
+        crossfadeLen = jmin(crossfadeLen, begin);
+    } else {
+        int remaining = data.getNumSamples() - (begin + len) - 1;
+        crossfadeLen = jmin(crossfadeLen, remaining);
+    }
+    updateSecondaryBegin();
+}
+
+void SampleLoopCrossFader::updateSecondaryBegin()
+{
+    int offset = forward ? -crossfadeLen : crossfadeLen;
+    secondary.setBegin(begin + offset);
+}

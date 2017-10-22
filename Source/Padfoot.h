@@ -63,11 +63,10 @@ public:
 private:
     
     std::unique_ptr<PadfootNote> getInactiveNote();
+
+    void handleMidiEvent(const MidiMessage &m);
+    void renderNotes(AudioSampleBuffer &buffer, int startSample, int numSamples);
     
     std::vector<std::unique_ptr<PadfootNote>> inactiveNotes;
     std::unordered_map<int, std::unique_ptr<PadfootNote>> activeNotes;
-
-    
-    void handleMidiEvent(const MidiMessage &m);
-    void renderNotes(AudioSampleBuffer &buffer, int startSample, int numSamples);
 };
