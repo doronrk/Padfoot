@@ -11,7 +11,7 @@
 #include "SampleArea.h"
 
 //==============================================================================
-LoopSelector::LoopSelector(SampleLoop &sl) :
+LoopSelector::LoopSelector(SampleLoopCrossFader &sl) :
     sampleLoop(sl),
     dragInProgress(false),
     dragBegin(0),
@@ -36,6 +36,10 @@ void LoopSelector::paint(Graphics& g)
         Rectangle<double> selectedProp{begin, 0.0, len, 1.0};
         Rectangle<int> selectedRect = bounds.getProportion(selectedProp);
         g.fillRect(selectedRect);
+        int crossfadeLen = sampleLoop.getCrossfadeLen();
+        int nSamples = sampleLoop.getNumSamples();
+        double crossOffset = crossfadeLen / (double) nSamples;
+        g.drawLine(begin * getWidth() - crossOffset * getWidth(), getHeight(), begin * getWidth(), 0, 1.0);
     }
 }
 
@@ -58,6 +62,7 @@ void LoopSelector::mouseDrag(const MouseEvent &event)
 
 void LoopSelector::mouseUp(const MouseEvent &event)
 {
+    // TODO handle case of drag from right to left
     int xDelta = event.getDistanceFromDragStartX();
     int xEnd = event.x;
     int xBegin = xEnd - xDelta;
@@ -72,7 +77,7 @@ void LoopSelector::mouseUp(const MouseEvent &event)
 //==============================================================================
 #define THUMB_RES 512
 
-Waveform::Waveform(SampleLoop &sl) :
+Waveform::Waveform(SampleLoopCrossFader &sl) :
 sampleLoop(sl),
 thumbnailCache(5),
 thumbnail(THUMB_RES, formatManager, thumbnailCache)
@@ -105,7 +110,7 @@ void Waveform::updateThumbnail()
 }
 
 //==============================================================================
-SampleArea::SampleArea(SampleLoop &sampleLoop) :
+SampleArea::SampleArea(SampleLoopCrossFader &sampleLoop) :
 loopSelector(sampleLoop),
 waveform(sampleLoop)
 {

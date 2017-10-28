@@ -9,6 +9,7 @@
 */
 
 #include "SampleLoop.h"
+#include "GetProcessor.h"
 
 ///////////////////////////////////////
 // SampleLoop
@@ -60,6 +61,7 @@ int SampleLoop::getIndexForPosition(int position) const
 float SampleLoop::getAmplitudeForPosition(int chan, int position) const
 {
     int index = getIndexForPosition(position);
+    jassert(index >= 0 && index < data.getNumSamples());
     return data.getSample(chan, index);
 }
 
@@ -129,6 +131,11 @@ void SampleLoop::setLen(int newLen)
     len = newLen;
 }
 
+int SampleLoop::getNumSamples() const {
+    return data.getNumSamples();
+}
+
+
 ///////////////////////////////////////
 // SampleLoopCrossFader
 ///////////////////////////////////////
@@ -152,14 +159,13 @@ float SampleLoopCrossFader::getAmplitude(int chan, double position) const
         return primaryAmp;
     }
     int offset = ((int) position) % len;
-    int crossfadeProgress = len - crossfadeLen + offset;
+    int crossfadeProgress = offset - (len - crossfadeLen);
     if (crossfadeProgress < 0) {
         return primaryAmp;
     }
     float secondaryAmp = secondary.getAmplitude(chan, position + crossfadeLen);
     float alpha = crossfadeProgress / (float) crossfadeLen;
     return interpolate(primaryAmp, secondaryAmp, alpha);
-    //return primaryAmp * .5 + secondaryAmp + .5;
 }
 
 void SampleLoopCrossFader::setRange(double beginFrac, double lenFrac)
@@ -167,15 +173,14 @@ void SampleLoopCrossFader::setRange(double beginFrac, double lenFrac)
     // TODO this should be cleaner
     SampleLoop::setRange(beginFrac, lenFrac);
     boundCrossfadeLen();
-    
-    //TODO remove this
-    setCrossfadeLen(44100);
+    redrawEditor();
 }
 
 void SampleLoopCrossFader::setLoopMode(LoopMode mode)
 {
     secondary.setLoopMode(mode);
     SampleLoop::setLoopMode(mode);
+    redrawEditor();
 }
 
 void SampleLoopCrossFader::setForward(bool forward)
@@ -183,6 +188,7 @@ void SampleLoopCrossFader::setForward(bool forward)
     secondary.setForward(forward);
     SampleLoop::setForward(forward);
     boundCrossfadeLen();
+    redrawEditor();
 }
 
 // TODO: UI
@@ -190,24 +196,33 @@ void SampleLoopCrossFader::setCrossfadeLen(int fadelen)
 {
     crossfadeLen = fadelen;
     boundCrossfadeLen();
+    redrawEditor();
 }
 
 void SampleLoopCrossFader::boundCrossfadeLen()
 {
-    // crossfadeLen cannot exceed length of the range
-    crossfadeLen = jmin(crossfadeLen, len);
-    if (forward) {
-        crossfadeLen = jmin(crossfadeLen, begin);
-    } else {
-        int remaining = data.getNumSamples() - (begin + len) - 1;
-        crossfadeLen = jmin(crossfadeLen, remaining);
-    }
-    updateSecondaryBegin();
+    int maxLen = getMaxCrossfadeLen();
+    crossfadeLen = jmin(crossfadeLen, maxLen);
+    updateSecondary();
 }
 
-void SampleLoopCrossFader::updateSecondaryBegin()
+void SampleLoopCrossFader::updateSecondary()
 {
     int offset = forward ? -crossfadeLen : crossfadeLen;
     secondary.setBegin(begin + offset);
     secondary.setLen(len);
 }
+
+int SampleLoopCrossFader::getCrossfadeLen() const {
+    return crossfadeLen;
+}
+
+int SampleLoopCrossFader::getMaxCrossfadeLen() const {
+    if (forward) {
+        return jmin(len, begin);
+    } else {
+        return jmin(len, getNumSamples() - (begin + len) - 1);
+    }
+}
+
+

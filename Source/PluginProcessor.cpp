@@ -10,7 +10,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-
+#include "GetProcessor.h"
 
 //==============================================================================
 NewProjectAudioProcessor::NewProjectAudioProcessor()
@@ -25,7 +25,8 @@ NewProjectAudioProcessor::NewProjectAudioProcessor()
                        )
 #endif
 {
-    
+    // TODO this is a huge fucking hack
+    processor.reset(this);
 }
 
 NewProjectAudioProcessor::~NewProjectAudioProcessor()

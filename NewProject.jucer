@@ -13,6 +13,9 @@
               pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.1.2">
   <MAINGROUP id="xFj02e" name="Padfoot">
     <GROUP id="{53A6EB2E-E476-3D8B-7693-DE189E7495F4}" name="Source">
+      <FILE id="akRoSh" name="GetProcessor.cpp" compile="1" resource="0"
+            file="Source/GetProcessor.cpp"/>
+      <FILE id="ozROAJ" name="GetProcessor.h" compile="0" resource="0" file="Source/GetProcessor.h"/>
       <GROUP id="{8875D373-5A33-4A23-B9D2-38EBD8602DA5}" name="model">
         <FILE id="AAVj95" name="Padfoot.cpp" compile="1" resource="0" file="Source/Padfoot.cpp"/>
         <FILE id="mpdfNz" name="Padfoot.h" compile="0" resource="0" file="Source/Padfoot.h"/>
@@ -20,8 +23,10 @@
         <FILE id="WV0bxf" name="SampleLoop.h" compile="0" resource="0" file="Source/SampleLoop.h"/>
       </GROUP>
       <GROUP id="{CADE4551-F00F-34D3-40C4-DB183ECDB086}" name="ui">
+        <FILE id="TChE12" name="ControlArea.cpp" compile="1" resource="0" file="Source/ControlArea.cpp"/>
+        <FILE id="LuJ2Qh" name="ControlArea.h" compile="0" resource="0" file="Source/ControlArea.h"/>
         <FILE id="f7c65E" name="SampleArea.cpp" compile="1" resource="0" file="Source/SampleArea.cpp"/>
-        <FILE id="ccvnVH" name="SampleArea.h" compile="1" resource="0" file="Source/SampleArea.h"/>
+        <FILE id="ccvnVH" name="SampleArea.h" compile="0" resource="0" file="Source/SampleArea.h"/>
       </GROUP>
       <FILE id="DIqThX" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>

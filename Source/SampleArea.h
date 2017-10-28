@@ -17,7 +17,7 @@
 class LoopSelector : public Component
 {
 public:
-    LoopSelector(SampleLoop &sampleLoop);
+    LoopSelector(SampleLoopCrossFader &sampleLoop);
     
     void paint (Graphics&) override;
     void resized() override;
@@ -27,7 +27,7 @@ public:
     void mouseDrag(const MouseEvent &event) override;
     
 private:
-    SampleLoop &sampleLoop;
+    SampleLoopCrossFader &sampleLoop;
     bool dragInProgress;
     int dragBegin;
     int dragCurrent;
@@ -37,14 +37,14 @@ private:
 class Waveform : public Component
 {
 public:
-    Waveform(SampleLoop &sampleLoop);
+    Waveform(SampleLoopCrossFader &sampleLoop);
     
     void paint (Graphics&) override;
     void resized() override;
     
     void updateThumbnail();
 private:
-    SampleLoop &sampleLoop;
+    SampleLoopCrossFader &sampleLoop;
     
     AudioFormatManager formatManager;
     AudioThumbnailCache thumbnailCache;
@@ -55,7 +55,7 @@ private:
 class SampleArea : public Component
 {
 public:
-    SampleArea(SampleLoop &sampleLoop);
+    SampleArea(SampleLoopCrossFader &sampleLoop);
     
     void resized() override;
 private:

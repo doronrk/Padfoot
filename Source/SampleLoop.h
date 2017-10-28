@@ -28,6 +28,7 @@ public:
     std::pair<double, double> getRange();
     virtual void setLoopMode(LoopMode mode);
     virtual void setForward(bool forward);
+    virtual int getNumSamples() const;
     
     // These functions should only be called by SampleLoopCrossFader
     void setBegin(int begin);
@@ -62,10 +63,12 @@ public:
     void setLoopMode(LoopMode mode) override;
     void setForward(bool forward) override;
     void setCrossfadeLen(int len);
+    int getCrossfadeLen() const;
+    int getMaxCrossfadeLen() const;
 
 private:
     void boundCrossfadeLen();
-    void updateSecondaryBegin();
+    void updateSecondary();
     
     SampleLoop secondary;
     int crossfadeLen{0};

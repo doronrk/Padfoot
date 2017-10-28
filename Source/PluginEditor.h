@@ -13,6 +13,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
 #include "SampleArea.h"
+#include "ControlArea.h"
 
 //==============================================================================
 class NewProjectAudioProcessorEditor  : public AudioProcessorEditor
@@ -28,6 +29,7 @@ private:
     Padfoot& padfoot;
     
     SampleArea sampleArea;
+    ControlArea controlArea;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NewProjectAudioProcessorEditor)
 };

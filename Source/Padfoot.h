@@ -74,7 +74,7 @@ public:
     
     void processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages);
     void prepareToPlay (double sampleRate, int samplesPerBlock);
-    
+        
     SampleLoopCrossFader sampleLoop;
 
 private:
@@ -86,7 +86,7 @@ private:
     
     std::vector<std::unique_ptr<PadfootNote>> inactiveNotes;
     std::unordered_map<int, std::unique_ptr<PadfootNote>> activeNotes;
-    
+
     AudioSampleBuffer data;
     VoicePlaybackInfo voicePlaybackInfo;
 };
