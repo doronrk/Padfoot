@@ -14,10 +14,10 @@
 #include "SampleLoop.h"
 
 //==============================================================================
-class LoopSelector : public Component
+class LoopSelector : public Component, private Value::Listener
 {
 public:
-    LoopSelector(SampleLoopCrossFader &sampleLoop);
+    LoopSelector(ValueTree& state);
     
     void paint (Graphics&) override;
     void resized() override;
@@ -27,7 +27,9 @@ public:
     void mouseDrag(const MouseEvent &event) override;
     
 private:
-    SampleLoopCrossFader &sampleLoop;
+    void valueChanged(Value& value) override;
+    
+    ValueTree& state;
     bool dragInProgress;
     int dragBegin;
     int dragCurrent;
@@ -37,14 +39,14 @@ private:
 class Waveform : public Component
 {
 public:
-    Waveform(SampleLoopCrossFader &sampleLoop);
+    Waveform(AudioSampleBuffer &data);
     
     void paint (Graphics&) override;
     void resized() override;
     
     void updateThumbnail();
 private:
-    SampleLoopCrossFader &sampleLoop;
+    AudioSampleBuffer &data;
     
     AudioFormatManager formatManager;
     AudioThumbnailCache thumbnailCache;
@@ -55,7 +57,7 @@ private:
 class SampleArea : public Component
 {
 public:
-    SampleArea(SampleLoopCrossFader &sampleLoop);
+    SampleArea(ValueTree& state, AudioSampleBuffer &data);
     
     void resized() override;
 private:

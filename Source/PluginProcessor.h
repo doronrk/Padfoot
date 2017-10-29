@@ -11,11 +11,8 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "Padfoot.h"
+#include "Padfoot.h" 
 
-//==============================================================================
-/**
-*/
 class NewProjectAudioProcessor  : public AudioProcessor
 {
 public:

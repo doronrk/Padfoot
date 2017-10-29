@@ -1,3 +1,10 @@
+TODO:
+  you actually need to fucking extend vars to store a lambda thats gets called immediately after setting 
+    this will allow you to validate/bound the option that was set
+  also add a way to hold the audiocallback lock while doing this
+
+
+
 MUST HAVE:
 
 crossfade near edges of sample loop

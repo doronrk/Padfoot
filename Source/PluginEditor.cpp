@@ -14,9 +14,8 @@
 NewProjectAudioProcessorEditor::NewProjectAudioProcessorEditor (NewProjectAudioProcessor& p)
     : AudioProcessorEditor (&p),
     processor (p),
-    padfoot(p.padfoot),
-    sampleArea(p.padfoot.sampleLoop),
-    controlArea(p.padfoot)
+    sampleArea(p.padfoot.sampleLoop.state, p.padfoot.data),
+    controlArea(p.padfoot.sampleLoop.state) // TODO this is not the right state
 {
     setResizable(true, true);
     setSize (700, 700);

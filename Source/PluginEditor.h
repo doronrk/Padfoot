@@ -25,9 +25,7 @@ public:
     void resized() override;
 
 private:
-    NewProjectAudioProcessor& processor;
-    Padfoot& padfoot;
-    
+    NewProjectAudioProcessor& processor;    
     SampleArea sampleArea;
     ControlArea controlArea;
 

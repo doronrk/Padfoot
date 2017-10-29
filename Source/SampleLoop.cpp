@@ -9,28 +9,41 @@
 */
 
 #include "SampleLoop.h"
-#include "GetProcessor.h"
 
 ///////////////////////////////////////
 // SampleLoop
 ///////////////////////////////////////
 
 SampleLoop::SampleLoop(const AudioSampleBuffer &data_)
-:data(data_) {}
+:data(data_), state("sample_loop_state") {
+    numSamplesVar = [this](const var::NativeFunctionArgs&) {
+        return data.getNumSamples();
+    };
+    state.setProperty(Identifier("begin"), beginVar, nullptr);
+    state.setProperty(Identifier("len"), lenVar, nullptr);
+    state.setProperty(Identifier("forward"), forwardVar, nullptr);
+    state.setProperty(Identifier("oneway"), oneWayVar, nullptr);
+    state.setProperty(Identifier("num_samples"), numSamplesVar, nullptr);
+}
 
-// TODO: race condition? used during audio callback
-void SampleLoop::reset()
-{
-    begin = 0;
-    len = data.getNumSamples();
-    // TODO: create a bound function for begin & len kind of like the crossfade one
-    // this can be called here and re-used when setRange is called.
+int SampleLoop::getBegin() const {
+    return (int) beginVar;
+}
+int SampleLoop::getLen() const {
+    return (int) lenVar;
+}
+bool SampleLoop::getForward() const {
+    return (bool) forwardVar;
+}
+bool SampleLoop::getOneWay() const {
+    return (bool) oneWayVar;
 }
 
 int SampleLoop::applyDirectionToOffset(int offset) const
 {
+    int len = getLen();
     jassert(offset < len);
-    if (forward) {
+    if (forwardVar) {
         return offset;
     }
     return len - offset;
@@ -38,12 +51,12 @@ int SampleLoop::applyDirectionToOffset(int offset) const
 
 int SampleLoop::applySustainModeToDoubleLenOffset(int doubleLenOffset) const
 {
+    int len = getLen();
     jassert(doubleLenOffset < len * 2);
     int singleLenOffset = doubleLenOffset % len;
-    if (mode == ONE_WAY) {
+    if (oneWayVar) {
         return singleLenOffset;
     }
-    // mode == TWO_WAY
     if (doubleLenOffset < len) {
         return singleLenOffset;
     }
@@ -52,10 +65,10 @@ int SampleLoop::applySustainModeToDoubleLenOffset(int doubleLenOffset) const
 
 int SampleLoop::getIndexForPosition(int position) const
 {
-    int doubleLenOffset = position % (len * 2);
+    int doubleLenOffset = position % (getLen() * 2);
     int sustainModeOffset = applySustainModeToDoubleLenOffset(doubleLenOffset);
     int directionOffest = applyDirectionToOffset(sustainModeOffset);
-    return begin + directionOffest;
+    return getBegin() + directionOffest;
 }
 
 float SampleLoop::getAmplitudeForPosition(int chan, int position) const
@@ -84,8 +97,10 @@ float SampleLoop::getAmplitude(int chan, double position) const
     return getAmplitudeForPosition(chan, position);
 }
 
+/*
 void SampleLoop::setRange(double beginFrac, double lenFrac)
 {
+    // TODO lock audio callback
     jassert(beginFrac < 1.0 &&
             lenFrac <= 1.0 &&
             beginFrac >= 0.0 &&
@@ -130,6 +145,7 @@ void SampleLoop::setLen(int newLen)
 {
     len = newLen;
 }
+ */
 
 int SampleLoop::getNumSamples() const {
     return data.getNumSamples();
@@ -142,22 +158,21 @@ int SampleLoop::getNumSamples() const {
 SampleLoopCrossFader::SampleLoopCrossFader(const AudioSampleBuffer &data)
 : SampleLoop(data), secondary(data)
 {
-    
+    state.getPropertyAsValue("begin", nullptr).addListener(this);
 }
 
-void SampleLoopCrossFader::reset()
-{
-    secondary.reset();
-    SampleLoop::reset();
+void SampleLoopCrossFader::valueChanged(juce::Value &value) {
+    
 }
 
 float SampleLoopCrossFader::getAmplitude(int chan, double position) const
 {
     // TODO: support TWO_WAY crossfading
     float primaryAmp = SampleLoop::getAmplitude(chan, position);
-    if (crossfadeLen == 0 || mode == TWO_WAY) {
+    if (crossfadeLen == 0 || !oneWayVar) {
         return primaryAmp;
     }
+    int len = getLen();
     int offset = ((int) position) % len;
     int crossfadeProgress = offset - (len - crossfadeLen);
     if (crossfadeProgress < 0) {
@@ -168,6 +183,7 @@ float SampleLoopCrossFader::getAmplitude(int chan, double position) const
     return interpolate(primaryAmp, secondaryAmp, alpha);
 }
 
+/*
 void SampleLoopCrossFader::setRange(double beginFrac, double lenFrac)
 {
     // TODO this should be cleaner
@@ -198,7 +214,8 @@ void SampleLoopCrossFader::setCrossfadeLen(int fadelen)
     boundCrossfadeLen();
     redrawEditor();
 }
-
+ */
+/*
 void SampleLoopCrossFader::boundCrossfadeLen()
 {
     int maxLen = getMaxCrossfadeLen();
@@ -208,21 +225,19 @@ void SampleLoopCrossFader::boundCrossfadeLen()
 
 void SampleLoopCrossFader::updateSecondary()
 {
-    int offset = forward ? -crossfadeLen : crossfadeLen;
-    secondary.setBegin(begin + offset);
-    secondary.setLen(len);
-}
-
-int SampleLoopCrossFader::getCrossfadeLen() const {
-    return crossfadeLen;
+    int offset = getForward() ? -crossfadeLen : crossfadeLen;
+    secondary.setBegin(getBegin() + offset);
+    secondary.setLen(getLen());
 }
 
 int SampleLoopCrossFader::getMaxCrossfadeLen() const {
-    if (forward) {
+    int begin = getBegin();
+    int len = getLen();
+    if (getForward()) {
         return jmin(len, begin);
     } else {
         return jmin(len, getNumSamples() - (begin + len) - 1);
     }
 }
 
-
+*/

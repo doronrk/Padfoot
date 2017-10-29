@@ -76,7 +76,8 @@ public:
     void prepareToPlay (double sampleRate, int samplesPerBlock);
         
     SampleLoopCrossFader sampleLoop;
-
+    AudioSampleBuffer data;
+    
 private:
     
     std::unique_ptr<PadfootNote> getInactiveNote();
@@ -87,6 +88,5 @@ private:
     std::vector<std::unique_ptr<PadfootNote>> inactiveNotes;
     std::unordered_map<int, std::unique_ptr<PadfootNote>> activeNotes;
 
-    AudioSampleBuffer data;
     VoicePlaybackInfo voicePlaybackInfo;
 };

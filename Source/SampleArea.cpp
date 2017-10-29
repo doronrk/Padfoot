@@ -11,13 +11,18 @@
 #include "SampleArea.h"
 
 //==============================================================================
-LoopSelector::LoopSelector(SampleLoopCrossFader &sl) :
-    sampleLoop(sl),
+LoopSelector::LoopSelector(ValueTree& state) :
+    state(state),
     dragInProgress(false),
     dragBegin(0),
     dragCurrent(0)
 {
-    
+    state.getPropertyAsValue("begin", nullptr).addListener(this);
+    repaint();
+}
+
+void LoopSelector::valueChanged(Value& value) {
+    repaint();
 }
 
 void LoopSelector::paint(Graphics& g)
@@ -30,16 +35,23 @@ void LoopSelector::paint(Graphics& g)
         Rectangle<int> selectedRect{dragBegin, 0, dragCurrent - dragBegin, getHeight()};
         g.fillRect(selectedRect);
     } else {
-        std::pair<double, double> range = sampleLoop.getRange();
-        double begin = range.first;
-        double len = range.second;
-        Rectangle<double> selectedProp{begin, 0.0, len, 1.0};
+        var::NativeFunctionArgs null{0, nullptr, 0};
+        var::NativeFunction numSamplesFunc = state["num_samples"].getNativeFunction();
+        int numSamples = numSamplesFunc(null);
+        int begin = state["begin"];
+        int len = state["len"];
+        float beginProp = begin / (float) numSamples;
+        float lenProp = len / (float) numSamples;
+        
+        Rectangle<double> selectedProp{beginProp, 0.0, lenProp, 1.0};
         Rectangle<int> selectedRect = bounds.getProportion(selectedProp);
         g.fillRect(selectedRect);
+        /*
         int crossfadeLen = sampleLoop.getCrossfadeLen();
         int nSamples = sampleLoop.getNumSamples();
         double crossOffset = crossfadeLen / (double) nSamples;
         g.drawLine(begin * getWidth() - crossOffset * getWidth(), getHeight(), begin * getWidth(), 0, 1.0);
+         */
     }
 }
 
@@ -67,18 +79,23 @@ void LoopSelector::mouseUp(const MouseEvent &event)
     int xEnd = event.x;
     int xBegin = xEnd - xDelta;
     int width = getWidth();
-    double begin = xBegin / (double) width;
-    double len = xDelta / (double) width;
-    sampleLoop.setRange(begin, len);
+    double beginProp = xBegin / (double) width;
+    double lenProp = xDelta / (double) width;
+    var::NativeFunctionArgs null{0, nullptr, 0};
+    var::NativeFunction numSamplesFunc = state["num_samples"].getNativeFunction();
+    int numSamples = numSamplesFunc(null);
+    int begin = beginProp * numSamples;
+    int len = lenProp * numSamples;
+    state.getPropertyAsValue("begin", nullptr) = begin;
+    state.getPropertyAsValue("len", nullptr) = len;
     dragInProgress = false;
-    repaint();
 }
 
 //==============================================================================
 #define THUMB_RES 512
 
-Waveform::Waveform(SampleLoopCrossFader &sl) :
-sampleLoop(sl),
+Waveform::Waveform(AudioSampleBuffer &data) :
+data(data),
 thumbnailCache(5),
 thumbnail(THUMB_RES, formatManager, thumbnailCache)
 {
@@ -102,17 +119,16 @@ void Waveform::resized()
 
 void Waveform::updateThumbnail()
 {
-    const AudioSampleBuffer &newData = sampleLoop.data;
-    int n = newData.getNumSamples();
+    int n = data.getNumSamples();
     // Note sample rate of 1 is just used to avoid bad design choice of making thumbnail aware of sample rate
     thumbnail.reset(2, /*sr*/ 1, n);
-    thumbnail.addBlock(0, newData, 0, n);
+    thumbnail.addBlock(0, data, 0, n);
 }
 
 //==============================================================================
-SampleArea::SampleArea(SampleLoopCrossFader &sampleLoop) :
-loopSelector(sampleLoop),
-waveform(sampleLoop)
+SampleArea::SampleArea(ValueTree& state, AudioSampleBuffer &data) :
+loopSelector(state),
+waveform(data)
 {
     addAndMakeVisible(loopSelector);
     addAndMakeVisible(waveform);

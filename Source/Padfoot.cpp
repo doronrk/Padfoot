@@ -90,8 +90,6 @@ Padfoot::Padfoot()
     afr->read(&data, 0, len, 0, true, true);
     voicePlaybackInfo.dataSampleRate = afr->sampleRate;
     voicePlaybackInfo.dataMidiRootNote = 74;
-
-    sampleLoop.reset();
     
     // TODO: make adjustable
     int polyphony = 6;

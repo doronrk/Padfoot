@@ -13,9 +13,6 @@
               pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="5.1.2">
   <MAINGROUP id="xFj02e" name="Padfoot">
     <GROUP id="{53A6EB2E-E476-3D8B-7693-DE189E7495F4}" name="Source">
-      <FILE id="akRoSh" name="GetProcessor.cpp" compile="1" resource="0"
-            file="Source/GetProcessor.cpp"/>
-      <FILE id="ozROAJ" name="GetProcessor.h" compile="0" resource="0" file="Source/GetProcessor.h"/>
       <GROUP id="{8875D373-5A33-4A23-B9D2-38EBD8602DA5}" name="model">
         <FILE id="AAVj95" name="Padfoot.cpp" compile="1" resource="0" file="Source/Padfoot.cpp"/>
         <FILE id="mpdfNz" name="Padfoot.h" compile="0" resource="0" file="Source/Padfoot.h"/>

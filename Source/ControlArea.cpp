@@ -12,9 +12,10 @@
 
 
 //==============================================================================
-ControlArea::ControlArea(Padfoot &padfoot) :
-padfoot(padfoot), sampleLoop(padfoot.sampleLoop)
+ControlArea::ControlArea(ValueTree &state) :
+state(state)
 {
+    /*
     addAndMakeVisible (s);
     s.setRange(0, sampleLoop.getMaxCrossfadeLen(), 1);
     s.setTextValueSuffix (" samples");
@@ -23,11 +24,14 @@ padfoot(padfoot), sampleLoop(padfoot.sampleLoop)
     // A: its because at this point the actual allowed range is [0, 0]
     s.setValue(0.0);
     repaint();
+     */
 }
 
 void ControlArea::paint (Graphics& g) {
+    /*
     s.setRange(0, sampleLoop.getMaxCrossfadeLen(), 1);
     s.setValue(sampleLoop.getCrossfadeLen());
+     */
 }
 
 void ControlArea::resized()
@@ -37,6 +41,8 @@ void ControlArea::resized()
 
 void ControlArea::sliderValueChanged (Slider* slider)
 {
+    /*
     if (slider == &s)
         padfoot.sampleLoop.setCrossfadeLen((int) s.getValue());
+     */
 }

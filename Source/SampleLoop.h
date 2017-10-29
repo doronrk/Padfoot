@@ -22,26 +22,34 @@ class SampleLoop
 public:
     SampleLoop(const AudioSampleBuffer &data);
     virtual ~SampleLoop() {};
-    virtual void reset();
     virtual float getAmplitude(int chan, double position) const;
+    /*
     virtual void setRange(double begin, double len);
     std::pair<double, double> getRange();
     virtual void setLoopMode(LoopMode mode);
     virtual void setForward(bool forward);
-    virtual int getNumSamples() const;
+     */
+    int getNumSamples() const;
     
     // These functions should only be called by SampleLoopCrossFader
     void setBegin(int begin);
     void setLen(int len);
     
     const AudioSampleBuffer &data;
-    
+    ValueTree state;
+
 protected:
-    int begin;
-    int len;
-    bool forward{true};
-    LoopMode mode{ONE_WAY};
+    // TODO updating any of these values should synchronize w audio callback thread
+    var beginVar{0};
+    var lenVar{0};
+    var forwardVar{true};
+    var oneWayVar{true};
+    var numSamplesVar;
     
+    inline int getBegin() const;
+    inline int getLen() const;
+    inline bool getForward() const;
+    inline bool getOneWay() const;
 
 private:
     inline int applyDirectionToOffset(int offset) const;
@@ -49,26 +57,19 @@ private:
     inline int getIndexForPosition(int position) const;
     inline float getAmplitudeForPosition(int chan, int position) const;
     inline float getAmplitudeForPosition(int chan, double position) const;
-    
 };
 
-class SampleLoopCrossFader : public SampleLoop
+class SampleLoopCrossFader : public SampleLoop, private Value::Listener
 {
 public:
     SampleLoopCrossFader(const AudioSampleBuffer &data);
     
-    void reset() override;
     float getAmplitude(int chan, double position) const override;
-    void setRange(double begin, double len) override;
-    void setLoopMode(LoopMode mode) override;
-    void setForward(bool forward) override;
-    void setCrossfadeLen(int len);
-    int getCrossfadeLen() const;
-    int getMaxCrossfadeLen() const;
-
+    
 private:
     void boundCrossfadeLen();
     void updateSecondary();
+    void valueChanged(juce::Value &value) override;
     
     SampleLoop secondary;
     int crossfadeLen{0};
