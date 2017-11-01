@@ -1,8 +1,6 @@
 TODO:
-  you actually need to fucking extend vars to store a lambda thats gets called immediately after setting 
-    this will allow you to validate/bound the option that was set
-  also add a way to hold the audiocallback lock while doing this
-
+  first try making value tree state changes synchronous and see if that's sufficient,
+    the SampleLoop can be a listener, and bound the value on the callback
 
 
 MUST HAVE:
