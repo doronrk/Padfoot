@@ -71,5 +71,5 @@ private:
     // TODO: changes to primary data must be propagated to secondary.stateTree
     // achieve this via adding some callbacks to this.
     SampleLoop secondary;
-    int crossfadeLen{0};
+    std::shared_ptr<State> crossfadeLen;
 };

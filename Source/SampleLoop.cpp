@@ -117,10 +117,13 @@ float SampleLoop::getAmplitude(int chan, double position) const
 SampleLoopCrossFader::SampleLoopCrossFader(const AudioSampleBuffer &data)
 : SampleLoop(data), secondary(data)
 {
+    crossfadeLen = std::make_shared<State>();
+    stateTree["crossfade_len"] = crossfadeLen;
 }
 
 float SampleLoopCrossFader::getAmplitude(int chan, double position) const
 {
+    int cl = crossfadeLen->get();
     // TODO: support TWO_WAY crossfading
     float primaryAmp = SampleLoop::getAmplitude(chan, position);
     if (crossfadeLen == 0 || !getOneWay()) {
@@ -128,55 +131,15 @@ float SampleLoopCrossFader::getAmplitude(int chan, double position) const
     }
     int len = getLen();
     int offset = ((int) position) % len;
-    int crossfadeProgress = offset - (len - crossfadeLen);
+    int crossfadeProgress = offset - (len - cl);
     if (crossfadeProgress < 0) {
         return primaryAmp;
     }
-    float secondaryAmp = secondary.getAmplitude(chan, position + crossfadeLen);
-    float alpha = crossfadeProgress / (float) crossfadeLen;
+    float secondaryAmp = secondary.getAmplitude(chan, position + cl);
+    float alpha = crossfadeProgress / (float) cl;
     return interpolate(primaryAmp, secondaryAmp, alpha);
 }
-
 /*
-void SampleLoopCrossFader::setRange(double beginFrac, double lenFrac)
-{
-    // TODO this should be cleaner
-    SampleLoop::setRange(beginFrac, lenFrac);
-    boundCrossfadeLen();
-    redrawEditor();
-}
-
-void SampleLoopCrossFader::setLoopMode(LoopMode mode)
-{
-    secondary.setLoopMode(mode);
-    SampleLoop::setLoopMode(mode);
-    redrawEditor();
-}
-
-void SampleLoopCrossFader::setForward(bool forward)
-{
-    secondary.setForward(forward);
-    SampleLoop::setForward(forward);
-    boundCrossfadeLen();
-    redrawEditor();
-}
-
-// TODO: UI
-void SampleLoopCrossFader::setCrossfadeLen(int fadelen)
-{
-    crossfadeLen = fadelen;
-    boundCrossfadeLen();
-    redrawEditor();
-}
- */
-/*
-void SampleLoopCrossFader::boundCrossfadeLen()
-{
-    int maxLen = getMaxCrossfadeLen();
-    crossfadeLen = jmin(crossfadeLen, maxLen);
-    updateSecondary();
-}
-
 void SampleLoopCrossFader::updateSecondary()
 {
     int offset = getForward() ? -crossfadeLen : crossfadeLen;
