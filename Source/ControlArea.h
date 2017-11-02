@@ -19,7 +19,7 @@
 class ControlArea : public Component, public Slider::Listener
 {
 public:
-    ControlArea(ValueTree &state);
+    ControlArea(StateTree &stateTree);
     
     void paint (Graphics&) override;
     void resized() override;
@@ -27,6 +27,6 @@ public:
     void sliderValueChanged (Slider* slider) override;
     
 private:
-    ValueTree& state;
+    StateTree& stateTree;
     Slider s;
 };

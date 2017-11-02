@@ -17,7 +17,7 @@
 class LoopSelector : public Component, private ValueTree::Listener
 {
 public:
-    LoopSelector(ValueTree& state);
+    LoopSelector(StateTree& stateTree);
     
     void paint (Graphics&) override;
     void resized() override;
@@ -33,7 +33,7 @@ private:
     void valueTreeChildOrderChanged (ValueTree &parentTreeWhoseChildrenHaveMoved, int oldIndex, int newIndex) override {}
     void valueTreeParentChanged (ValueTree &treeWhoseParentHasChanged) override {}
     
-    ValueTree& state;
+    StateTree& stateTree;
     bool dragInProgress;
     int dragBegin;
     int dragCurrent;
@@ -61,7 +61,7 @@ private:
 class SampleArea : public Component
 {
 public:
-    SampleArea(ValueTree& state, AudioSampleBuffer &data);
+    SampleArea(StateTree& stateTree, AudioSampleBuffer &data);
     
     void resized() override;
 private:

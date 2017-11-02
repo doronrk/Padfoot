@@ -11,6 +11,11 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include <unordered_map>
+#include <memory>
+#include "State.h"
+
+using StateTree = std::unordered_map<std::string, std::shared_ptr<State>>;
 
 enum LoopMode {
     ONE_WAY,
@@ -36,9 +41,10 @@ public:
     void setLen(int len);
     
     const AudioSampleBuffer &data;
-    ValueTree state;
+    std::unordered_map<std::string, std::shared_ptr<State>> stateTree;
+    ValueTree state; // TODO: eliminate
 
-protected:
+protected:    
     // TODO updating any of these values should synchronize w audio callback thread
     var beginVar{0};
     var lenVar{0};
@@ -57,13 +63,9 @@ private:
     inline int getIndexForPosition(int position) const;
     inline float getAmplitudeForPosition(int chan, int position) const;
     inline float getAmplitudeForPosition(int chan, double position) const;
-    /*
-    void valueTreePropertyChanged (ValueTree &treeWhosePropertyHasChanged, const Identifier &property) override;
-    void valueTreeChildAdded (ValueTree &parentTree, ValueTree &childWhichHasBeenAdded) override {}
-    void valueTreeChildRemoved (ValueTree &parentTree, ValueTree &childWhichHasBeenRemoved, int indexFromWhichChildWasRemoved) override {}
-    void valueTreeChildOrderChanged (ValueTree &parentTreeWhoseChildrenHaveMoved, int oldIndex, int newIndex) override {}
-    void valueTreeParentChanged (ValueTree &treeWhoseParentHasChanged) override {}
-     */
+    
+    bool validateBegin(int value) const;
+    bool validateLen(int value) const;
 };
 
 class SampleLoopCrossFader : public SampleLoop

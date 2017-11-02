@@ -20,21 +20,30 @@ SampleLoop::SampleLoop(const AudioSampleBuffer &data_)
     numSamplesVar = [this](const var::NativeFunctionArgs&) {
         return data.getNumSamples();
     };
-    state.setProperty(Identifier("begin"), beginVar, nullptr);
-    state.setProperty(Identifier("len"), lenVar, nullptr);
     state.setProperty(Identifier("forward"), forwardVar, nullptr);
     state.setProperty(Identifier("oneway"), oneWayVar, nullptr);
     state.setProperty(Identifier("num_samples"), numSamplesVar, nullptr);
     
-    State s([](int v){return v > 5;});
-    s.addCallback([](const State& s){std::cout << "callback called" << std::endl;});
-    s.set(4); 
-    std::cout << s.get() << std::endl;
-    s.set(10);
-    std::cout << s.get() << std::endl;
-
-    //state.addListener(this);
+    State::Validator beginValid = [this](int v) {return this->validateBegin(v);};
+    stateTree["begin"] = std::make_shared<State>(beginValid);
+    
+    State::Validator lenValid = [this](int v) {return this->validateLen(v);};
+    stateTree["len"] = std::make_shared<State>(lenValid);
+    
+    stateTree["num_samples"] = std::make_shared<State>();
 }
+
+bool SampleLoop::validateBegin(int value) const {
+    std::cout << "validateBegin called" << std::endl;
+    return value >= 0 && value < data.getNumSamples();
+}
+
+bool SampleLoop::validateLen(int value) const {
+    std::cout << "validateLen called" << std::endl;
+    int begin = stateTree.at("begin")->get();
+    return value >= 0 && value <= data.getNumSamples() - begin;
+}
+
 /*
 void SampleLoop::valueTreePropertyChanged (ValueTree &treeWhosePropertyHasChanged, const Identifier &property) {
     if (property == Identifier("begin")) {
@@ -49,10 +58,10 @@ void SampleLoop::valueTreePropertyChanged (ValueTree &treeWhosePropertyHasChange
 }
 */
 int SampleLoop::getBegin() const {
-    return (int) beginVar;
+    return stateTree.at("begin")->get();
 }
 int SampleLoop::getLen() const {
-    return (int) lenVar;
+    return stateTree.at("len")->get();
 }
 bool SampleLoop::getForward() const {
     return (bool) forwardVar;

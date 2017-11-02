@@ -12,11 +12,16 @@
 
 #include <vector>
 #include <functional>
+#include <unordered_map>
+#include <memory>
+#include <string>
 
 class State {
+
+public:
     using Callback = std::function<void(const State& s)>;
     using Validator = std::function<bool(int v)>;
-public:
+    
     State() {};
     State(const Validator& v);
     int get() const;

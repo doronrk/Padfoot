@@ -12,8 +12,8 @@
 
 
 //==============================================================================
-ControlArea::ControlArea(ValueTree &state) :
-state(state)
+ControlArea::ControlArea(StateTree &st) :
+stateTree(st)
 {
     /*
     addAndMakeVisible (s);

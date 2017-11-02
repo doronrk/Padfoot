@@ -11,8 +11,8 @@
 #include "SampleArea.h"
 
 //==============================================================================
-LoopSelector::LoopSelector(ValueTree& state) :
-    state(state),
+LoopSelector::LoopSelector(StateTree& st) :
+    stateTree(st),
     dragInProgress(false),
     dragBegin(0),
     dragCurrent(0)
@@ -38,11 +38,9 @@ void LoopSelector::paint(Graphics& g)
         Rectangle<int> selectedRect{dragBegin, 0, dragCurrent - dragBegin, getHeight()};
         g.fillRect(selectedRect);
     } else {
-        var::NativeFunctionArgs null{0, nullptr, 0};
-        var::NativeFunction numSamplesFunc = state["num_samples"].getNativeFunction();
-        int numSamples = numSamplesFunc(null);
-        int begin = state["begin"];
-        int len = state["len"];
+        int numSamples = stateTree.at("num_samples")->get();
+        int begin = stateTree.at("begin")->get();
+        int len = stateTree.at("len")->get();
         float beginProp = begin / (float) numSamples;
         float lenProp = len / (float) numSamples;
         
@@ -84,13 +82,12 @@ void LoopSelector::mouseUp(const MouseEvent &event)
     int width = getWidth();
     double beginProp = xBegin / (double) width;
     double lenProp = xDelta / (double) width;
-    var::NativeFunctionArgs null{0, nullptr, 0};
-    var::NativeFunction numSamplesFunc = state["num_samples"].getNativeFunction();
-    int numSamples = numSamplesFunc(null);
+    
+    int numSamples = stateTree.at("num_samples")->get();
     int begin = beginProp * numSamples;
     int len = lenProp * numSamples;
-    state.getPropertyAsValue("begin", nullptr) = begin;
-    state.getPropertyAsValue("len", nullptr) = len;
+    stateTree["begin"]->set(begin);
+    stateTree["len"]->set(len);
     dragInProgress = false;
 }
 
@@ -129,8 +126,8 @@ void Waveform::updateThumbnail()
 }
 
 //==============================================================================
-SampleArea::SampleArea(ValueTree& state, AudioSampleBuffer &data) :
-loopSelector(state),
+SampleArea::SampleArea(StateTree& stateTree, AudioSampleBuffer &data) :
+loopSelector(stateTree),
 waveform(data)
 {
     addAndMakeVisible(loopSelector);
