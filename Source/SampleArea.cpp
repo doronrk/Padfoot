@@ -17,15 +17,12 @@ LoopSelector::LoopSelector(StateTree& st) :
     dragBegin(0),
     dragCurrent(0)
 {
-    //state.addListener(this);
+    stateTree.at("crossfade_len")->addCallback([this](const State& s){this->crossfadeCallback(s);});
     repaint();
 }
 
-void LoopSelector::valueTreePropertyChanged (ValueTree &treeWhosePropertyHasChanged, const Identifier &property) {
-/*    if (property == Identifier("begin")) {
-        std::cout << "going to repaint" << std::endl;
-        repaint();
-    }*/
+void LoopSelector::crossfadeCallback(const State& /*s*/) {
+    repaint();
 }
 
 void LoopSelector::paint(Graphics& g)
@@ -47,12 +44,10 @@ void LoopSelector::paint(Graphics& g)
         Rectangle<double> selectedProp{beginProp, 0.0, lenProp, 1.0};
         Rectangle<int> selectedRect = bounds.getProportion(selectedProp);
         g.fillRect(selectedRect);
-        /*
-        int crossfadeLen = sampleLoop.getCrossfadeLen();
-        int nSamples = sampleLoop.getNumSamples();
-        double crossOffset = crossfadeLen / (double) nSamples;
-        g.drawLine(begin * getWidth() - crossOffset * getWidth(), getHeight(), begin * getWidth(), 0, 1.0);
-         */
+        
+        int crossfadeLen = stateTree.at("crossfade_len")->get();
+        double crossOffset = crossfadeLen / (double) numSamples;
+        g.drawLine(beginProp * getWidth() - crossOffset * getWidth(), getHeight(), beginProp * getWidth(), 0, 1.0);
     }
 }
 
