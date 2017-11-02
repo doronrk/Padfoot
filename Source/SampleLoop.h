@@ -28,29 +28,11 @@ public:
     SampleLoop(const AudioSampleBuffer &data);
     virtual ~SampleLoop() {};
     virtual float getAmplitude(int chan, double position) const;
-    /*
-    virtual void setRange(double begin, double len);
-    std::pair<double, double> getRange();
-    virtual void setLoopMode(LoopMode mode);
-    virtual void setForward(bool forward);
-     */
-    int getNumSamples() const;
-    
-    // These functions should only be called by SampleLoopCrossFader
-    void setBegin(int begin);
-    void setLen(int len);
     
     const AudioSampleBuffer &data;
     std::unordered_map<std::string, std::shared_ptr<State>> stateTree;
-    ValueTree state; // TODO: eliminate
 
-protected:    
-    // TODO updating any of these values should synchronize w audio callback thread
-    var beginVar{0};
-    var lenVar{0};
-    var forwardVar{true};
-    var oneWayVar{true};
-    var numSamplesVar;
+protected:
     
     inline int getBegin() const;
     inline int getLen() const;
@@ -66,19 +48,28 @@ private:
     
     bool validateBegin(int value) const;
     bool validateLen(int value) const;
+    
+    std::shared_ptr<State> begin;
+    std::shared_ptr<State> len;
+    // TODO make this a callback union type
+    std::shared_ptr<State> numSamples;
+    // TODO make these States
+    bool forward;
+    bool oneWay;
 };
 
 class SampleLoopCrossFader : public SampleLoop
 {
 public:
     SampleLoopCrossFader(const AudioSampleBuffer &data);
-    
     float getAmplitude(int chan, double position) const override;
     
 private:
     void boundCrossfadeLen();
     void updateSecondary();
     
+    // TODO: changes to primary data must be propagated to secondary.stateTree
+    // achieve this via adding some callbacks to this.
     SampleLoop secondary;
     int crossfadeLen{0};
 };

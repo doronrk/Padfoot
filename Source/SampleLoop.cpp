@@ -16,21 +16,17 @@
 ///////////////////////////////////////
 
 SampleLoop::SampleLoop(const AudioSampleBuffer &data_)
-:data(data_), state("sample_loop_state") {
-    numSamplesVar = [this](const var::NativeFunctionArgs&) {
-        return data.getNumSamples();
-    };
-    state.setProperty(Identifier("forward"), forwardVar, nullptr);
-    state.setProperty(Identifier("oneway"), oneWayVar, nullptr);
-    state.setProperty(Identifier("num_samples"), numSamplesVar, nullptr);
-    
+:data(data_){
     State::Validator beginValid = [this](int v) {return this->validateBegin(v);};
-    stateTree["begin"] = std::make_shared<State>(beginValid);
-    
+    begin = std::make_shared<State>(beginValid);
+    stateTree["begin"] = begin;
+
     State::Validator lenValid = [this](int v) {return this->validateLen(v);};
-    stateTree["len"] = std::make_shared<State>(lenValid);
-    
-    stateTree["num_samples"] = std::make_shared<State>();
+    len = std::make_shared<State>(lenValid);
+    stateTree["len"] = len;
+
+    numSamples = std::make_shared<State>();
+    stateTree["num_samples"] = numSamples;
 }
 
 bool SampleLoop::validateBegin(int value) const {
@@ -44,37 +40,24 @@ bool SampleLoop::validateLen(int value) const {
     return value >= 0 && value <= data.getNumSamples() - begin;
 }
 
-/*
-void SampleLoop::valueTreePropertyChanged (ValueTree &treeWhosePropertyHasChanged, const Identifier &property) {
-    if (property == Identifier("begin")) {
-        std::cout << "begin set to: " << (int) beginVar << std::endl;
-    } else if (property == Identifier("len")) {
-        std::cout << "len set to: " << (int) lenVar << std::endl;
-    } else if (property == Identifier("forward")) {
-        std::cout << "forward set to: " << (bool) forwardVar << std::endl;
-    } else if (property == Identifier("oneway")) {
-        std::cout << "oneway set to: " << (bool) oneWayVar << std::endl;
-    }
-}
-*/
 int SampleLoop::getBegin() const {
-    return stateTree.at("begin")->get();
+    return begin->get();
 }
 int SampleLoop::getLen() const {
-    return stateTree.at("len")->get();
+    return len->get();
 }
 bool SampleLoop::getForward() const {
-    return (bool) forwardVar;
+    return forward;
 }
 bool SampleLoop::getOneWay() const {
-    return (bool) oneWayVar;
+    return oneWay;
 }
 
 int SampleLoop::applyDirectionToOffset(int offset) const
 {
     int len = getLen();
     jassert(offset < len);
-    if (forwardVar) {
+    if (getForward()) {
         return offset;
     }
     return len - offset;
@@ -85,7 +68,7 @@ int SampleLoop::applySustainModeToDoubleLenOffset(int doubleLenOffset) const
     int len = getLen();
     jassert(doubleLenOffset < len * 2);
     int singleLenOffset = doubleLenOffset % len;
-    if (oneWayVar) {
+    if (getOneWay()) {
         return singleLenOffset;
     }
     if (doubleLenOffset < len) {
@@ -128,61 +111,6 @@ float SampleLoop::getAmplitude(int chan, double position) const
     return getAmplitudeForPosition(chan, position);
 }
 
-/*
-void SampleLoop::setRange(double beginFrac, double lenFrac)
-{
-    // TODO lock audio callback
-    jassert(beginFrac < 1.0 &&
-            lenFrac <= 1.0 &&
-            beginFrac >= 0.0 &&
-            lenFrac >= 0.0);
-    int numSamples = data.getNumSamples();
-    begin = beginFrac * numSamples;
-    len = lenFrac * numSamples;
-    if (len == 0) {
-        len = 1;
-    }
-    
-    int maxLen = numSamples - begin;
-    len = jmin(len, maxLen);
-}
-
-std::pair<double, double> SampleLoop::getRange()
-{
-    int numSamples = data.getNumSamples();
-    double rangeBegin = begin / (double) numSamples;
-    double rangeLen = len / (double) numSamples;
-    return std::pair<double, double>{rangeBegin, rangeLen};
-}
-
-// TODO: UI
-void SampleLoop::setLoopMode(LoopMode mode_)
-{
-    mode = mode_;
-}
-
-// TODO: UI
-void SampleLoop::setForward(bool forward_)
-{
-    forward = forward_;
-}
-
-void SampleLoop::setBegin(int newbegin)
-{
-    begin = newbegin;
-}
-
-void SampleLoop::setLen(int newLen)
-{
-    len = newLen;
-}
- */
-
-int SampleLoop::getNumSamples() const {
-    return data.getNumSamples();
-}
-
-
 ///////////////////////////////////////
 // SampleLoopCrossFader
 ///////////////////////////////////////
@@ -195,7 +123,7 @@ float SampleLoopCrossFader::getAmplitude(int chan, double position) const
 {
     // TODO: support TWO_WAY crossfading
     float primaryAmp = SampleLoop::getAmplitude(chan, position);
-    if (crossfadeLen == 0 || !oneWayVar) {
+    if (crossfadeLen == 0 || !getOneWay()) {
         return primaryAmp;
     }
     int len = getLen();
