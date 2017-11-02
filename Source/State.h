@@ -1,35 +1,29 @@
 /*
   ==============================================================================
 
-    state.h
-    Created: 1 Nov 2017 6:21:17pm
+    State.h
+    Created: 1 Nov 2017 9:06:57pm
     Author:  Doron Roberts-Kedes
 
   ==============================================================================
 */
-#include <functional>
-#include <vector>
 
 #pragma once
 
+#include <vector>
+#include <functional>
+
 class State {
-using Validator = std::function<bool(int v)>;
-using Callback = std::function<void(const State& s)>;
-    
+    using Callback = std::function<void(const State& s)>;
+    using Validator = std::function<bool(int v)>;
 public:
-    State();
+    State() {};
     State(const Validator& v);
-    void operator= (int value);
     int get() const;
+    void set(int v);
     void addCallback(const Callback& cb);
 private:
     int value{0};
-    Validator validator;
+    Validator validator{[](int /*v*/){return true;}};
     std::vector<Callback> callbacks;
-};
-
-class StateTree {
-public:
-    void operator[] (std::string key) const;
-    
 };

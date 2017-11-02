@@ -9,7 +9,7 @@
 */
 
 #include "SampleLoop.h"
-#include "state.h"
+#include "State.h"
 
 ///////////////////////////////////////
 // SampleLoop
@@ -26,10 +26,12 @@ SampleLoop::SampleLoop(const AudioSampleBuffer &data_)
     state.setProperty(Identifier("oneway"), oneWayVar, nullptr);
     state.setProperty(Identifier("num_samples"), numSamplesVar, nullptr);
     
-//    State s;
-//    s = 5;
-//
-//    std::cout << s.get() << std::endl;
+    State s([](int v){return v > 5;});
+    s.addCallback([](const State& s){std::cout << "callback called" << std::endl;});
+    s.set(4); 
+    std::cout << s.get() << std::endl;
+    s.set(10);
+    std::cout << s.get() << std::endl;
 
     //state.addListener(this);
 }

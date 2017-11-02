@@ -1,21 +1,22 @@
 /*
   ==============================================================================
 
-    state.cpp
-    Created: 1 Nov 2017 6:21:17pm
+    State.cpp
+    Created: 1 Nov 2017 9:06:57pm
     Author:  Doron Roberts-Kedes
 
   ==============================================================================
 */
 
-#include "state.h"
+#include "State.h"
 
-State::State() {}
+State::State(const Validator& v) : validator(v) {}
 
-State::State(const Validator& v) :
-validator(v) {}
+int State::get() const {
+    return value;
+}
 
-void State::operator= (int v) {
+void State::set(int v) {
     if (!validator(v)) {
         return;
     }
@@ -25,10 +26,6 @@ void State::operator= (int v) {
     }
 }
 
-int State::get() const {
-    return value;
-}
-
-void State::addCallback(const Callback& cb) {
+void State::addCallback(const Callback &cb) {
     callbacks.push_back(cb);
 }
