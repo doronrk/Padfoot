@@ -14,7 +14,7 @@
 #include "SampleLoop.h"
 
 //==============================================================================
-class LoopSelector : public Component, private Value::Listener
+class LoopSelector : public Component, private ValueTree::Listener
 {
 public:
     LoopSelector(ValueTree& state);
@@ -27,7 +27,11 @@ public:
     void mouseDrag(const MouseEvent &event) override;
     
 private:
-    void valueChanged(Value& value) override;
+    void valueTreePropertyChanged (ValueTree &treeWhosePropertyHasChanged, const Identifier &property) override;
+    void valueTreeChildAdded (ValueTree &parentTree, ValueTree &childWhichHasBeenAdded) override {}
+    void valueTreeChildRemoved (ValueTree &parentTree, ValueTree &childWhichHasBeenRemoved, int indexFromWhichChildWasRemoved) override {}
+    void valueTreeChildOrderChanged (ValueTree &parentTreeWhoseChildrenHaveMoved, int oldIndex, int newIndex) override {}
+    void valueTreeParentChanged (ValueTree &treeWhoseParentHasChanged) override {}
     
     ValueTree& state;
     bool dragInProgress;

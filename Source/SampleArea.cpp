@@ -17,12 +17,15 @@ LoopSelector::LoopSelector(ValueTree& state) :
     dragBegin(0),
     dragCurrent(0)
 {
-    state.getPropertyAsValue("begin", nullptr).addListener(this);
+    //state.addListener(this);
     repaint();
 }
 
-void LoopSelector::valueChanged(Value& value) {
-    repaint();
+void LoopSelector::valueTreePropertyChanged (ValueTree &treeWhosePropertyHasChanged, const Identifier &property) {
+/*    if (property == Identifier("begin")) {
+        std::cout << "going to repaint" << std::endl;
+        repaint();
+    }*/
 }
 
 void LoopSelector::paint(Graphics& g)

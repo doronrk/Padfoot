@@ -17,7 +17,7 @@ enum LoopMode {
     TWO_WAY
 };
 
-class SampleLoop
+class SampleLoop //: private ValueTree::Listener
 {
 public:
     SampleLoop(const AudioSampleBuffer &data);
@@ -57,9 +57,16 @@ private:
     inline int getIndexForPosition(int position) const;
     inline float getAmplitudeForPosition(int chan, int position) const;
     inline float getAmplitudeForPosition(int chan, double position) const;
+    /*
+    void valueTreePropertyChanged (ValueTree &treeWhosePropertyHasChanged, const Identifier &property) override;
+    void valueTreeChildAdded (ValueTree &parentTree, ValueTree &childWhichHasBeenAdded) override {}
+    void valueTreeChildRemoved (ValueTree &parentTree, ValueTree &childWhichHasBeenRemoved, int indexFromWhichChildWasRemoved) override {}
+    void valueTreeChildOrderChanged (ValueTree &parentTreeWhoseChildrenHaveMoved, int oldIndex, int newIndex) override {}
+    void valueTreeParentChanged (ValueTree &treeWhoseParentHasChanged) override {}
+     */
 };
 
-class SampleLoopCrossFader : public SampleLoop, private Value::Listener
+class SampleLoopCrossFader : public SampleLoop
 {
 public:
     SampleLoopCrossFader(const AudioSampleBuffer &data);
@@ -69,7 +76,6 @@ public:
 private:
     void boundCrossfadeLen();
     void updateSecondary();
-    void valueChanged(juce::Value &value) override;
     
     SampleLoop secondary;
     int crossfadeLen{0};

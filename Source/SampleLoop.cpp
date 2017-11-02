@@ -9,6 +9,7 @@
 */
 
 #include "SampleLoop.h"
+#include "state.h"
 
 ///////////////////////////////////////
 // SampleLoop
@@ -24,8 +25,27 @@ SampleLoop::SampleLoop(const AudioSampleBuffer &data_)
     state.setProperty(Identifier("forward"), forwardVar, nullptr);
     state.setProperty(Identifier("oneway"), oneWayVar, nullptr);
     state.setProperty(Identifier("num_samples"), numSamplesVar, nullptr);
-}
+    
+//    State s;
+//    s = 5;
+//
+//    std::cout << s.get() << std::endl;
 
+    //state.addListener(this);
+}
+/*
+void SampleLoop::valueTreePropertyChanged (ValueTree &treeWhosePropertyHasChanged, const Identifier &property) {
+    if (property == Identifier("begin")) {
+        std::cout << "begin set to: " << (int) beginVar << std::endl;
+    } else if (property == Identifier("len")) {
+        std::cout << "len set to: " << (int) lenVar << std::endl;
+    } else if (property == Identifier("forward")) {
+        std::cout << "forward set to: " << (bool) forwardVar << std::endl;
+    } else if (property == Identifier("oneway")) {
+        std::cout << "oneway set to: " << (bool) oneWayVar << std::endl;
+    }
+}
+*/
 int SampleLoop::getBegin() const {
     return (int) beginVar;
 }
@@ -158,11 +178,6 @@ int SampleLoop::getNumSamples() const {
 SampleLoopCrossFader::SampleLoopCrossFader(const AudioSampleBuffer &data)
 : SampleLoop(data), secondary(data)
 {
-    state.getPropertyAsValue("begin", nullptr).addListener(this);
-}
-
-void SampleLoopCrossFader::valueChanged(juce::Value &value) {
-    
 }
 
 float SampleLoopCrossFader::getAmplitude(int chan, double position) const
