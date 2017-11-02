@@ -37,7 +37,7 @@ bool SampleLoop::validateBegin(int value) const {
 bool SampleLoop::validateLen(int value) const {
     std::cout << "validateLen called" << std::endl;
     int begin = stateTree.at("begin")->get();
-    return value >= 0 && value <= data.getNumSamples() - begin;
+    return value > 0 && value <= data.getNumSamples() - begin;
 }
 
 int SampleLoop::getBegin() const {
