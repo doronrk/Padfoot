@@ -36,16 +36,10 @@ bool SampleLoop::validateBegin(int value) const {
 
 bool SampleLoop::validateLen(int value) const {
     std::cout << "validateLen called" << std::endl;
-    int begin = stateTree.at("begin")->get();
+    int begin = *stateTree.at("begin");
     return value > 0 && value <= data.getNumSamples() - begin;
 }
 
-int SampleLoop::getBegin() const {
-    return begin->get();
-}
-int SampleLoop::getLen() const {
-    return len->get();
-}
 bool SampleLoop::getForward() const {
     return forward;
 }
@@ -55,7 +49,7 @@ bool SampleLoop::getOneWay() const {
 
 int SampleLoop::applyDirectionToOffset(int offset) const
 {
-    int len = getLen();
+    int len = *stateTree.at("len");
     jassert(offset < len);
     if (getForward()) {
         return offset;
@@ -65,7 +59,7 @@ int SampleLoop::applyDirectionToOffset(int offset) const
 
 int SampleLoop::applySustainModeToDoubleLenOffset(int doubleLenOffset) const
 {
-    int len = getLen();
+    int len = *stateTree.at("len");
     jassert(doubleLenOffset < len * 2);
     int singleLenOffset = doubleLenOffset % len;
     if (getOneWay()) {
@@ -79,10 +73,12 @@ int SampleLoop::applySustainModeToDoubleLenOffset(int doubleLenOffset) const
 
 int SampleLoop::getIndexForPosition(int position) const
 {
-    int doubleLenOffset = position % (getLen() * 2);
+    int len = *stateTree.at("len");
+    int begin = *stateTree.at("begin");
+    int doubleLenOffset = position % (len * 2);
     int sustainModeOffset = applySustainModeToDoubleLenOffset(doubleLenOffset);
     int directionOffest = applyDirectionToOffset(sustainModeOffset);
-    return getBegin() + directionOffest;
+    return begin + directionOffest;
 }
 
 float SampleLoop::getAmplitudeForPosition(int chan, int position) const
@@ -123,13 +119,13 @@ SampleLoopCrossFader::SampleLoopCrossFader(const AudioSampleBuffer &data)
 
 float SampleLoopCrossFader::getAmplitude(int chan, double position) const
 {
-    int cl = crossfadeLen->get();
+    int cl = *stateTree.at("crossfade_len");
     // TODO: support TWO_WAY crossfading
     float primaryAmp = SampleLoop::getAmplitude(chan, position);
     if (crossfadeLen == 0 || !getOneWay()) {
         return primaryAmp;
     }
-    int len = getLen();
+    int len = *stateTree.at("len");
     int offset = ((int) position) % len;
     int crossfadeProgress = offset - (len - cl);
     if (crossfadeProgress < 0) {

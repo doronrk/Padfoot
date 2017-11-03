@@ -1,6 +1,12 @@
 TODO:
-  first try making value tree state changes synchronous and see if that's sufficient,
-    the SampleLoop can be a listener, and bound the value on the callback
+Add support for union type to State, explore std::variant
+Add lambda to union type
+Convert bools State
+Convert num_samples and max_crossfade_len to lambdas
+Make SampleLoopCrossFader add a callback for begin, len, forward, oneway that propagates changes to secondary 
+  convince yourself that lambda's like num_samples will "just work" even when data member field of primary changes.
+
+
 
 
 MUST HAVE:

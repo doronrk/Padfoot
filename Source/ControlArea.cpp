@@ -17,7 +17,7 @@ stateTree(st)
 {
     addAndMakeVisible (s);
     // TODO update to use proper key once lambdas supported
-    int maxCrossfadeLen = stateTree.at("num_samples")->get();
+    int maxCrossfadeLen = *stateTree.at("num_samples");
     s.setRange(0, maxCrossfadeLen, 1);
     s.setTextValueSuffix (" samples");
     s.addListener (this);
@@ -28,9 +28,9 @@ stateTree(st)
 }
 
 void ControlArea::paint (Graphics& g) {
-    int maxCrossfadeLen = stateTree.at("num_samples")->get();
+    int maxCrossfadeLen = *stateTree.at("num_samples");
     s.setRange(0, maxCrossfadeLen, 1);
-    int crossfadeLen = stateTree.at("crossfade_len")->get();
+    int crossfadeLen = *stateTree.at("crossfade_len");
     s.setValue(crossfadeLen);
 }
 
@@ -42,6 +42,6 @@ void ControlArea::resized()
 void ControlArea::sliderValueChanged (Slider* slider)
 {
     if (slider == &s) {
-        stateTree.at("crossfade_len")->set((int) s.getValue());
+        *stateTree.at("crossfade_len") = (int) s.getValue();
     }
 }

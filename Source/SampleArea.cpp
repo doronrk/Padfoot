@@ -35,9 +35,9 @@ void LoopSelector::paint(Graphics& g)
         Rectangle<int> selectedRect{dragBegin, 0, dragCurrent - dragBegin, getHeight()};
         g.fillRect(selectedRect);
     } else {
-        int numSamples = stateTree.at("num_samples")->get();
-        int begin = stateTree.at("begin")->get();
-        int len = stateTree.at("len")->get();
+        int numSamples = *stateTree.at("num_samples");
+        int begin = *stateTree.at("begin");
+        int len = *stateTree.at("len");
         float beginProp = begin / (float) numSamples;
         float lenProp = len / (float) numSamples;
         
@@ -45,7 +45,7 @@ void LoopSelector::paint(Graphics& g)
         Rectangle<int> selectedRect = bounds.getProportion(selectedProp);
         g.fillRect(selectedRect);
         
-        int crossfadeLen = stateTree.at("crossfade_len")->get();
+        int crossfadeLen = *stateTree.at("crossfade_len");
         double crossOffset = crossfadeLen / (double) numSamples;
         g.drawLine(beginProp * getWidth() - crossOffset * getWidth(), getHeight(), beginProp * getWidth(), 0, 1.0);
     }
@@ -78,11 +78,12 @@ void LoopSelector::mouseUp(const MouseEvent &event)
     double beginProp = xBegin / (double) width;
     double lenProp = xDelta / (double) width;
     
-    int numSamples = stateTree.at("num_samples")->get();
+    int numSamples = *stateTree.at("num_samples");
+    
     int begin = beginProp * numSamples;
     int len = lenProp * numSamples;
-    stateTree["begin"]->set(begin);
-    stateTree["len"]->set(len);
+    *stateTree["begin"] = begin;
+    *stateTree["len"] = len;
     dragInProgress = false;
 }
 

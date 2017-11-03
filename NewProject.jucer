@@ -3,7 +3,7 @@
 <JUCERPROJECT id="sw3oWy" name="Padfoot" displaySplashScreen="1" reportAppUsage="1"
               splashScreenColour="Dark" projectType="audioplug" version="1.0.0"
               bundleIdentifier="com.yourcompany.NewProject" includeBinaryInAppConfig="1"
-              cppLanguageStandard="14" buildVST="1" buildVST3="0" buildAU="0"
+              cppLanguageStandard="latest" buildVST="1" buildVST3="0" buildAU="0"
               buildAUv3="0" buildRTAS="0" buildAAX="0" buildStandalone="1"
               enableIAA="0" pluginName="NewProject" pluginDesc="NewProject"
               pluginManufacturer="yourcompany" pluginManufacturerCode="Manu"
@@ -16,6 +16,7 @@
       <GROUP id="{7F30CEAE-374D-BCC2-A664-7C0DEB1F992A}" name="data">
         <FILE id="vaFkZL" name="State.cpp" compile="1" resource="0" file="Source/State.cpp"/>
         <FILE id="DfwZFG" name="State.h" compile="0" resource="0" file="Source/State.h"/>
+        <FILE id="Qo1ovX" name="Variant.h" compile="0" resource="0" file="Source/Variant.h"/>
       </GROUP>
       <GROUP id="{8875D373-5A33-4A23-B9D2-38EBD8602DA5}" name="model">
         <FILE id="AAVj95" name="Padfoot.cpp" compile="1" resource="0" file="Source/Padfoot.cpp"/>

@@ -34,8 +34,6 @@ public:
 
 protected:
     
-    inline int getBegin() const;
-    inline int getLen() const;
     inline bool getForward() const;
     inline bool getOneWay() const;
 
