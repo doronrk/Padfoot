@@ -17,11 +17,16 @@
 
 SampleLoop::SampleLoop(const AudioSampleBuffer &data_)
 :data(data_){
-    State::Validator beginValid = [this](int v) {return this->validateBegin(v);};
+
+    State::Validator beginValid = [this](const State& s) {
+        return this->validateBegin(s);
+    };
     begin = std::make_shared<State>(beginValid);
     stateTree["begin"] = begin;
 
-    State::Validator lenValid = [this](int v) {return this->validateLen(v);};
+    State::Validator lenValid = [this](const State& s) {
+        return this->validateLen(s);
+    };
     len = std::make_shared<State>(lenValid);
     stateTree["len"] = len;
 
@@ -35,9 +40,10 @@ bool SampleLoop::validateBegin(int value) const {
 }
 
 bool SampleLoop::validateLen(int value) const {
-    std::cout << "validateLen called" << std::endl;
     int begin = *stateTree.at("begin");
-    return value > 0 && value <= data.getNumSamples() - begin;
+    bool ret = value > 0 && value <= data.getNumSamples() - begin;
+    std::cout << "value: " << value << "begin: " << begin << "ret: " << ret << std::endl;
+    return ret;
 }
 
 bool SampleLoop::getForward() const {

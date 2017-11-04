@@ -44,8 +44,8 @@ private:
     inline float getAmplitudeForPosition(int chan, int position) const;
     inline float getAmplitudeForPosition(int chan, double position) const;
     
-    bool validateBegin(int value) const;
-    bool validateLen(int value) const;
+    bool validateBegin(int) const;
+    bool validateLen(int) const;
     
     std::shared_ptr<State> begin;
     std::shared_ptr<State> len;

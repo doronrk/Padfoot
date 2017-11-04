@@ -33,7 +33,7 @@ void State::addCallback(const Callback &cb) {
 }
 
 State& State::operator= (int value) {
-    if (!validator(*this)) {
+    if (!validator(State(value))) {
         return *this;
     }
     value_ = value;
@@ -44,7 +44,7 @@ State& State::operator= (int value) {
 }
 
 State& State::operator= (bool value) {
-    if (!validator(*this)) {
+    if (!validator(State(value))) {
         return *this;
     }
     value_ = value;

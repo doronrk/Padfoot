@@ -82,7 +82,9 @@ void LoopSelector::mouseUp(const MouseEvent &event)
     
     int begin = beginProp * numSamples;
     int len = lenProp * numSamples;
+    std::cout << "numSamples: " << numSamples << std::endl;
     *stateTree["begin"] = begin;
+    std::cout << "len: " << len << std::endl;
     *stateTree["len"] = len;
     dragInProgress = false;
 }
